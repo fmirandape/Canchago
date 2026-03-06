@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-expo-app@latest CanchaGo --template blank-typescript)",
+      "Bash(node --version)",
+      "Bash(npm --version)",
+      "Bash(export PATH=\"/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:$PATH\")",
+      "Bash(brew list)",
+      "Bash(/opt/homebrew/bin/brew install node)",
+      "Bash(export PATH=\"/opt/homebrew/bin:$PATH\")",
+      "Bash(export PATH=\"/opt/homebrew/bin:/usr/bin:/bin:$PATH\")",
+      "Bash(npm install expo-router expo-location expo-linear-gradient expo-blur expo-haptics expo-font @expo-google-fonts/inter react-native-maps @gorhom/bottom-sheet react-native-reanimated react-native-gesture-handler @tanstack/react-query react-native-svg lucide-react-native react-native-safe-area-context @react-native-async-storage/async-storage)",
+      "Bash(npm install @expo-google-fonts/inter expo-splash-screen)",
+      "Bash(npm install expo-splash-screen --legacy-peer-deps)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(npx expo export --platform web)",
+      "Bash(npx expo install react-dom react-native-web @expo/metro-runtime)",
+      "mcp__Claude_Preview__preview_start"
+    ]
+  }
+}

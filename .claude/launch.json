@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "CanchaGo",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd /Users/farithmiranda/Claude/CanchaGo && PATH=/opt/homebrew/bin:/usr/bin:/bin:$PATH npx expo start --web --port 8081 --no-dev"],
+      "port": 8081
+    }
+  ]
+}
