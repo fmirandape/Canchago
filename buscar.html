@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Buscar cancha en Bogotá | CanchaGo</title>
+  <meta name="description" content="Encuentra y reserva canchas de fútbol, pádel, tenis y básquet en Bogotá. Disponibilidad en tiempo real. Paga con PSE o Nequi." />
+  <meta name="keywords" content="buscar cancha bogota, reservar cancha futbol bogota, canchas disponibles bogota hoy, alquilar cancha deportiva bogota" />
+  <link rel="canonical" href="https://canchago.co/buscar" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --green:   #22c55e; --green-d: #16a34a;
+      --dark:    #0a0f1e; --card: #111827; --card2: #1f2937;
+      --border:  #1f2937; --border2: #374151;
+      --muted:   #9ca3af; --text: #f9fafb; --radius: 14px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--dark); color: var(--text); min-height: 100vh; }
+    a { color: inherit; text-decoration: none; }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.25rem; height: 56px;
+      background: rgba(10,15,30,.92); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .logo { font-weight: 900; font-size: 1.15rem; color: var(--green); }
+    .nav-right { display: flex; gap: .75rem; align-items: center; }
+    .btn-sm {
+      background: var(--card2); border: 1px solid var(--border2);
+      color: var(--muted); font-size: .8rem; font-weight: 600;
+      padding: .4rem .9rem; border-radius: 8px; cursor: pointer;
+    }
+    .btn-sm:hover { color: var(--text); border-color: var(--green); }
+    .btn-sm-green {
+      background: var(--green); color: #fff; border: none;
+      font-size: .8rem; font-weight: 700; padding: .4rem .9rem; border-radius: 8px; cursor: pointer;
+    }
+
+    /* SEARCH HERO */
+    .search-hero {
+      background: linear-gradient(160deg, rgba(34,197,94,.08) 0%, transparent 50%);
+      border-bottom: 1px solid var(--border); padding: 1.75rem 1.25rem 1.5rem;
+    }
+    .search-hero h1 { font-size: 1.35rem; font-weight: 900; margin-bottom: 1.1rem; }
+    .search-hero h1 span { color: var(--green); }
+
+    /* SEARCH FORM */
+    .search-form {
+      display: grid; gap: .65rem;
+      grid-template-columns: 1fr 1fr;
+    }
+    .sf-field { display: flex; flex-direction: column; gap: .3rem; }
+    .sf-field label { font-size: .7rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .sf-field select, .sf-field input {
+      background: var(--card2); border: 1.5px solid var(--border2);
+      border-radius: 10px; color: var(--text);
+      padding: .65rem .85rem; font-size: .9rem; font-family: inherit; outline: none;
+    }
+    .sf-field select:focus, .sf-field input:focus { border-color: var(--green); }
+    .sf-field select option { background: var(--card2); }
+    .btn-search {
+      grid-column: 1 / -1;
+      background: var(--green); color: #fff; border: none;
+      padding: .8rem; border-radius: 10px; font-size: .95rem;
+      font-weight: 700; cursor: pointer; transition: background .2s;
+    }
+    .btn-search:hover { background: var(--green-d); }
+
+    /* FILTER PILLS */
+    .filters {
+      padding: 1rem 1.25rem;
+      display: flex; gap: .5rem; overflow-x: auto; scrollbar-width: none;
+      border-bottom: 1px solid var(--border);
+    }
+    .filters::-webkit-scrollbar { display: none; }
+    .fp {
+      flex-shrink: 0; padding: .4rem 1rem; border-radius: 9999px;
+      font-size: .8rem; font-weight: 600; cursor: pointer;
+      border: 1.5px solid var(--border2); color: var(--muted); background: none;
+      transition: all .2s;
+    }
+    .fp:hover, .fp.active { background: var(--green); border-color: var(--green); color: #fff; }
+
+    /* RESULTS BAR */
+    .results-bar {
+      padding: .9rem 1.25rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .results-count { font-size: .875rem; color: var(--muted); }
+    .results-count strong { color: var(--text); }
+    .sort-select {
+      background: var(--card2); border: 1px solid var(--border2);
+      color: var(--muted); font-size: .78rem; font-weight: 600;
+      padding: .35rem .75rem; border-radius: 8px; outline: none; font-family: inherit; cursor: pointer;
+    }
+
+    /* COURT CARDS */
+    .cards-wrap { padding: 0 1.25rem 2rem; }
+    .court-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); margin-bottom: 1rem;
+      overflow: hidden; cursor: pointer;
+      transition: border-color .2s, transform .15s;
+      display: grid; grid-template-columns: 120px 1fr;
+    }
+    .court-card:hover { border-color: var(--green); transform: translateY(-1px); }
+    .card-img {
+      background: linear-gradient(160deg, #0d2b1a, #1a3a2a);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.5rem; min-height: 130px; position: relative;
+    }
+    .card-avail {
+      position: absolute; top: .5rem; left: .5rem;
+      background: rgba(34,197,94,.9); color: #fff;
+      font-size: .65rem; font-weight: 700; padding: .2rem .5rem; border-radius: 6px;
+    }
+    .card-avail.pocas { background: rgba(251,191,36,.9); color: #000; }
+    .card-avail.llena { background: rgba(239,68,68,.85); }
+    .card-body { padding: .9rem; }
+    .card-tags { display: flex; flex-wrap: wrap; gap: .35rem; margin-bottom: .5rem; }
+    .card-tag {
+      font-size: .65rem; font-weight: 700; padding: .18rem .5rem; border-radius: 9999px;
+      background: var(--card2); color: var(--muted); border: 1px solid var(--border2);
+    }
+    .card-name { font-size: .95rem; font-weight: 800; line-height: 1.25; margin-bottom: .35rem; }
+    .card-meta { font-size: .75rem; color: var(--muted); margin-bottom: .5rem; display: flex; flex-wrap: wrap; gap: .6rem; }
+    .card-meta span { display: flex; align-items: center; gap: .25rem; }
+    .card-footer { display: flex; align-items: center; justify-content: space-between; }
+    .card-price { font-size: 1rem; font-weight: 900; color: var(--green); }
+    .card-price span { font-size: .7rem; font-weight: 400; color: var(--muted); }
+    .btn-ver {
+      background: var(--green); color: #fff; border: none;
+      padding: .4rem .9rem; border-radius: 8px;
+      font-size: .78rem; font-weight: 700; cursor: pointer;
+      transition: background .2s;
+    }
+    .btn-ver:hover { background: var(--green-d); }
+
+    /* EMPTY STATE */
+    .empty { text-align: center; padding: 4rem 1.25rem; color: var(--muted); }
+    .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .empty h3 { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: .5rem; }
+    .empty p { font-size: .875rem; line-height: 1.65; }
+
+    /* MAP TOGGLE */
+    .view-toggle {
+      display: flex; gap: .5rem; padding: 0 1.25rem .75rem;
+    }
+    .vt-btn {
+      padding: .4rem .9rem; border-radius: 8px; font-size: .8rem;
+      font-weight: 600; cursor: pointer; border: 1.5px solid var(--border2);
+      background: none; color: var(--muted); transition: all .2s;
+    }
+    .vt-btn.active { background: var(--card2); color: var(--text); border-color: var(--border2); }
+
+    /* MAP PLACEHOLDER */
+    .map-view {
+      display: none; margin: 0 1.25rem 2rem;
+      background: var(--card2); border: 1px solid var(--border2);
+      border-radius: var(--radius); height: 340px;
+      align-items: center; justify-content: center;
+      flex-direction: column; gap: .75rem; color: var(--muted); text-align: center;
+    }
+    .map-view.show { display: flex; }
+    .map-view .map-pins { font-size: 2rem; }
+
+    /* SKELETON LOADER */
+    .skeleton {
+      background: linear-gradient(90deg, var(--card) 25%, var(--card2) 50%, var(--card) 75%);
+      background-size: 200% 100%; animation: shimmer 1.4s infinite;
+      border-radius: 8px;
+    }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    @media (min-width: 640px) {
+      .search-form { grid-template-columns: 1fr 1fr 1fr auto; }
+      .btn-search { grid-column: auto; }
+      .cards-wrap { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; padding: 0 1.25rem 2rem; }
+      .cards-wrap .court-card { display: flex; flex-direction: column; }
+      .card-img { min-height: 150px; }
+      .cards-wrap .court-card { grid-template-columns: unset; }
+    }
+    @media (min-width: 1024px) {
+      .cards-wrap { grid-template-columns: repeat(3, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="logo">⚽ CanchaGo</a>
+  <div class="nav-right">
+    <button class="btn-sm" onclick="window.location.href='panel.html'">Panel dueño</button>
+    <button class="btn-sm-green" onclick="window.location.href='registro.html'">Registrar cancha</button>
+  </div>
+</nav>
+
+<!-- SEARCH HERO -->
+<div class="search-hero">
+  <h1>Canchas disponibles <span>en Bogotá</span></h1>
+  <div class="search-form" id="searchForm">
+    <div class="sf-field">
+      <label>Deporte</label>
+      <select id="fDeporte" onchange="applyFilters()">
+        <option value="">Todos</option>
+        <option value="Fútbol 5">Fútbol 5</option>
+        <option value="Fútbol 7">Fútbol 7</option>
+        <option value="Pádel">Pádel</option>
+        <option value="Tenis">Tenis</option>
+        <option value="Básquet">Básquet</option>
+        <option value="Voleibol">Voleibol</option>
+      </select>
+    </div>
+    <div class="sf-field">
+      <label>Localidad</label>
+      <select id="fLocalidad" onchange="applyFilters()">
+        <option value="">Toda Bogotá</option>
+        <option>Usaquén</option><option>Chapinero</option><option>Suba</option>
+        <option>Engativá</option><option>Kennedy</option><option>Fontibón</option>
+        <option>Teusaquillo</option><option>Barrios Unidos</option><option>Bosa</option>
+        <option>Ciudad Bolívar</option>
+      </select>
+    </div>
+    <div class="sf-field">
+      <label>Fecha</label>
+      <input type="date" id="fFecha" onchange="applyFilters()" />
+    </div>
+    <button class="btn-search" onclick="triggerSearch()">🔍 Buscar</button>
+  </div>
+</div>
+
+<!-- FILTER PILLS -->
+<div class="filters" role="list" aria-label="Filtros rápidos">
+  <button class="fp active" onclick="setPill(this,'')" role="listitem">Todos</button>
+  <button class="fp" onclick="setPill(this,'Fútbol 5')" role="listitem">⚽ Fútbol 5</button>
+  <button class="fp" onclick="setPill(this,'Fútbol 7')" role="listitem">⚽ Fútbol 7</button>
+  <button class="fp" onclick="setPill(this,'Pádel')" role="listitem">🎾 Pádel</button>
+  <button class="fp" onclick="setPill(this,'Tenis')" role="listitem">🎾 Tenis</button>
+  <button class="fp" onclick="setPill(this,'Básquet')" role="listitem">🏀 Básquet</button>
+  <button class="fp" onclick="setPill(this,'💡 Con luz')" role="listitem">💡 Con luz</button>
+  <button class="fp" onclick="setPill(this,'🅿️ Parqueadero')" role="listitem">🅿️ Parqueadero</button>
+</div>
+
+<!-- RESULTS BAR + VIEW TOGGLE -->
+<div class="results-bar">
+  <div class="results-count" id="resultsCount"><strong>12</strong> canchas disponibles</div>
+  <select class="sort-select" id="sortSelect" onchange="applyFilters()">
+    <option value="relevancia">Relevancia</option>
+    <option value="precio-asc">Precio: menor primero</option>
+    <option value="precio-desc">Precio: mayor primero</option>
+    <option value="rating">Mejor calificadas</option>
+  </select>
+</div>
+<div class="view-toggle">
+  <button class="vt-btn active" id="btnList" onclick="setView('list')">📋 Lista</button>
+  <button class="vt-btn" id="btnMap" onclick="setView('map')">🗺️ Mapa</button>
+</div>
+
+<!-- CARDS -->
+<div class="cards-wrap" id="cardsWrap"></div>
+
+<!-- MAP VIEW -->
+<div class="map-view" id="mapView">
+  <div class="map-pins">📍📍📍</div>
+  <div style="font-size:.9rem;font-weight:600;color:var(--text)">Vista de mapa</div>
+  <div style="font-size:.8rem">La integración con Google Maps se activa con la clave de API.</div>
+  <button class="btn-ver" style="margin-top:.5rem" onclick="setView('list')">Ver en lista →</button>
+</div>
+
+<!-- EMPTY STATE -->
+<div class="empty" id="emptyState" style="display:none">
+  <div class="empty-icon">🔍</div>
+  <h3>Sin resultados</h3>
+  <p>No encontramos canchas con esos filtros.<br/>Intenta cambiando el deporte o la localidad.</p>
+</div>
+
+<script>
+  /* ===== DATA ===== */
+  const COURTS = [
+    { id:1, name:'Cancha Central El Nogal', sport:'Fútbol 5', localidad:'Usaquén',     icon:'⚽', price:80000, rating:4.8, reviews:62, avail:'disponible', luz:true,  parking:true,  tags:['Césped sint.','Vestieres'] },
+    { id:2, name:'Pádel Club Chicó',        sport:'Pádel',    localidad:'Chapinero',   icon:'🎾', price:65000, rating:4.9, reviews:38, avail:'pocas',      luz:true,  parking:false, tags:['Cristal','Aire acond.'] },
+    { id:3, name:'Fútbol 7 La Floresta',    sport:'Fútbol 7', localidad:'Engativá',    icon:'⚽', price:120000,rating:4.6, reviews:27, avail:'disponible', luz:true,  parking:true,  tags:['Grama nat.','Tribuna'] },
+    { id:4, name:'Club Tenis Country',      sport:'Tenis',    localidad:'Usaquén',     icon:'🎾', price:55000, rating:4.7, reviews:91, avail:'disponible', luz:false, parking:true,  tags:['Arcilla','Instructores'] },
+    { id:5, name:'Básquet Parque Simón',    sport:'Básquet',  localidad:'Teusaquillo', icon:'🏀', price:35000, rating:4.4, reviews:19, avail:'disponible', luz:true,  parking:false, tags:['Parquet','Al aire libre'] },
+    { id:6, name:'Pádel Norte Suba',        sport:'Pádel',    localidad:'Suba',        icon:'🎾', price:58000, rating:4.5, reviews:44, avail:'llena',      luz:true,  parking:true,  tags:['Cristal','Cafetería'] },
+    { id:7, name:'Fútbol 5 Kennedy Park',   sport:'Fútbol 5', localidad:'Kennedy',     icon:'⚽', price:60000, rating:4.3, reviews:33, avail:'disponible', luz:false, parking:false, tags:['Césped sint.'] },
+    { id:8, name:'Cancha Fontibón FC',      sport:'Fútbol 7', localidad:'Fontibón',    icon:'⚽', price:110000,rating:4.6, reviews:21, avail:'pocas',      luz:true,  parking:true,  tags:['Grama sint.','Camerinos'] },
+    { id:9, name:'Voleibol Barrios Unidos', sport:'Voleibol', localidad:'Barrios Unidos',icon:'🏐',price:30000,rating:4.2, reviews:12, avail:'disponible', luz:false, parking:false, tags:['Arena','2 canchas'] },
+    { id:10,name:'Tenis Club Chapinero',    sport:'Tenis',    localidad:'Chapinero',   icon:'🎾', price:50000, rating:4.8, reviews:55, avail:'disponible', luz:true,  parking:false, tags:['Dura','4 canchas'] },
+    { id:11,name:'Fútbol 5 Bosa Arena',     sport:'Fútbol 5', localidad:'Bosa',        icon:'⚽', price:55000, rating:4.1, reviews:8,  avail:'disponible', luz:true,  parking:true,  tags:['Césped sint.'] },
+    { id:12,name:'Básquet Ciudad Bolívar',  sport:'Básquet',  localidad:'Ciudad Bolívar',icon:'🏀',price:25000,rating:4.0, reviews:6,  avail:'disponible', luz:false, parking:false, tags:['Concreto'] },
+  ];
+
+  let activeSport = '';
+  let currentView = 'list';
+
+  /* ===== SET DEFAULT DATE ===== */
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('fFecha').value = today;
+  document.getElementById('fFecha').min = today;
+
+  /* ===== RENDER ===== */
+  function formatPrice(n) { return '$' + n.toLocaleString('es-CO'); }
+
+  function availLabel(a) {
+    if (a === 'disponible') return ['Disponible', ''];
+    if (a === 'pocas')      return ['Pocas horas', 'pocas'];
+    return ['Sin turnos', 'llena'];
+  }
+
+  function renderCard(c) {
+    const [aLabel, aCls] = availLabel(c.avail);
+    const extras = [];
+    if (c.luz) extras.push('💡 Luz');
+    if (c.parking) extras.push('🅿️ Parking');
+    return `
+      <div class="court-card" onclick="window.location.href='cancha.html'" role="article" aria-label="${c.name}">
+        <div class="card-img">
+          ${c.icon}
+          <div class="card-avail ${aCls}">${aLabel}</div>
+        </div>
+        <div class="card-body">
+          <div class="card-tags">
+            <span class="card-tag">${c.sport}</span>
+            ${c.tags.map(t => `<span class="card-tag">${t}</span>`).join('')}
+            ${extras.map(e => `<span class="card-tag">${e}</span>`).join('')}
+          </div>
+          <div class="card-name">${c.name}</div>
+          <div class="card-meta">
+            <span>⭐ ${c.rating} <span style="color:var(--border2)">(${c.reviews})</span></span>
+            <span>📍 ${c.localidad}</span>
+          </div>
+          <div class="card-footer">
+            <div class="card-price">${formatPrice(c.price)} <span>/ hora</span></div>
+            <button class="btn-ver" onclick="event.stopPropagation();window.location.href='cancha.html'">${c.avail === 'llena' ? 'Ver horarios' : 'Reservar'}</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function applyFilters() {
+    const sport     = activeSport || document.getElementById('fDeporte').value;
+    const localidad = document.getElementById('fLocalidad').value;
+    const sort      = document.getElementById('sortSelect').value;
+
+    let list = COURTS.filter(c => {
+      if (sport && sport !== '💡 Con luz' && sport !== '🅿️ Parqueadero' && c.sport !== sport) return false;
+      if (sport === '💡 Con luz' && !c.luz) return false;
+      if (sport === '🅿️ Parqueadero' && !c.parking) return false;
+      if (localidad && c.localidad !== localidad) return false;
+      return true;
+    });
+
+    if (sort === 'precio-asc')  list.sort((a,b) => a.price - b.price);
+    if (sort === 'precio-desc') list.sort((a,b) => b.price - a.price);
+    if (sort === 'rating')      list.sort((a,b) => b.rating - a.rating);
+
+    const wrap = document.getElementById('cardsWrap');
+    const empty = document.getElementById('emptyState');
+    document.getElementById('resultsCount').innerHTML = `<strong>${list.length}</strong> cancha${list.length !== 1 ? 's' : ''} disponible${list.length !== 1 ? 's' : ''}`;
+
+    if (list.length === 0) {
+      wrap.innerHTML = '';
+      empty.style.display = 'block';
+    } else {
+      empty.style.display = 'none';
+      wrap.innerHTML = list.map(renderCard).join('');
+    }
+  }
+
+  function setPill(el, sport) {
+    document.querySelectorAll('.fp').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    activeSport = sport;
+    document.getElementById('fDeporte').value = ['Fútbol 5','Fútbol 7','Pádel','Tenis','Básquet','Voleibol'].includes(sport) ? sport : '';
+    applyFilters();
+  }
+
+  function triggerSearch() {
+    applyFilters();
+    document.getElementById('cardsWrap').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function setView(v) {
+    currentView = v;
+    document.getElementById('btnList').classList.toggle('active', v === 'list');
+    document.getElementById('btnMap').classList.toggle('active', v === 'map');
+    document.getElementById('cardsWrap').style.display = v === 'list' ? '' : 'none';
+    document.getElementById('emptyState').style.display = v === 'map' ? 'none' : (document.getElementById('emptyState').style.display);
+    document.getElementById('mapView').classList.toggle('show', v === 'map');
+  }
+
+  /* ===== INIT ===== */
+  applyFilters();
+</script>
+</body>
+</html>
