@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cancha Central El Nogal | CanchaGo Bogotá</title>
+  <meta name="description" content="Reserva tu turno en Cancha Central El Nogal, Usaquén, Bogotá. Fútbol 5 con césped sintético e iluminación. Desde $80.000/hora. Paga en línea con PSE o Nequi." />
+  <link rel="canonical" href="https://canchago.co/elnogal" />
+  <meta property="og:title" content="Cancha Central El Nogal — Reserva en línea" />
+  <meta property="og:description" content="Fútbol 5 en Usaquén. Disponible hoy. Reserva y paga en línea." />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SportsActivityLocation",
+    "name": "Cancha Central El Nogal",
+    "description": "Cancha de fútbol 5 con césped sintético en Usaquén, Bogotá.",
+    "address": { "@type": "PostalAddress", "streetAddress": "Cra 7 #119-52", "addressLocality": "Bogotá", "addressCountry": "CO" },
+    "priceRange": "COP $80.000/hora",
+    "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.8", "reviewCount": "62" }
+  }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --green:   #22c55e;
+      --green-d: #16a34a;
+      --dark:    #0a0f1e;
+      --card:    #111827;
+      --card2:   #1f2937;
+      --border:  #1f2937;
+      --border2: #374151;
+      --muted:   #9ca3af;
+      --text:    #f9fafb;
+      --red:     #ef4444;
+      --radius:  14px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--dark); color: var(--text); padding-bottom: 100px; }
+    a { color: inherit; text-decoration: none; }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.25rem; height: 56px;
+      background: rgba(10,15,30,.92); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .logo { font-weight: 900; font-size: 1.1rem; color: var(--green); }
+    .nav-share {
+      display: flex; align-items: center; gap: .5rem;
+      background: var(--card2); border: 1px solid var(--border2);
+      border-radius: 8px; padding: .4rem .85rem;
+      font-size: .8rem; font-weight: 600; cursor: pointer; color: var(--muted);
+    }
+    .nav-share:hover { color: var(--text); border-color: var(--green); }
+
+    /* GALLERY */
+    .gallery {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      grid-template-rows: 200px 110px;
+      gap: 4px;
+      max-height: 320px;
+      overflow: hidden;
+    }
+    .gallery-main {
+      grid-row: 1 / 3;
+      background: linear-gradient(160deg, #0d2b1a 0%, #1a3a2a 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 5rem; cursor: pointer; position: relative;
+    }
+    .gallery-sm {
+      background: linear-gradient(160deg, #112b1a 0%, #1e3d2a 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.5rem; cursor: pointer; position: relative;
+    }
+    .gallery-sm:last-child { position: relative; }
+    .gallery-more {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,.55);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .85rem; font-weight: 700; color: #fff; cursor: pointer;
+    }
+    .photo-badge {
+      position: absolute; bottom: .75rem; right: .75rem;
+      background: rgba(0,0,0,.65); color: #fff;
+      font-size: .75rem; font-weight: 600; padding: .3rem .7rem;
+      border-radius: 8px; backdrop-filter: blur(4px);
+    }
+
+    /* MAIN CONTENT */
+    .content { max-width: 780px; margin: 0 auto; padding: 1.5rem 1.25rem; }
+
+    /* HEADER INFO */
+    .court-header { margin-bottom: 1.25rem; }
+    .court-tags { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: .75rem; }
+    .tag {
+      display: inline-flex; align-items: center; gap: .3rem;
+      background: var(--card2); border: 1px solid var(--border2);
+      color: var(--muted); font-size: .75rem; font-weight: 600;
+      padding: .3rem .7rem; border-radius: 9999px;
+    }
+    .tag.available { background: rgba(34,197,94,.1); border-color: rgba(34,197,94,.3); color: var(--green); }
+    .court-name { font-size: 1.6rem; font-weight: 900; line-height: 1.2; margin-bottom: .5rem; }
+    .court-meta { display: flex; flex-wrap: wrap; gap: 1rem; color: var(--muted); font-size: .875rem; }
+    .court-meta span { display: flex; align-items: center; gap: .35rem; }
+    .rating-stars { color: #fbbf24; font-size: .85rem; }
+
+    /* DIVIDER */
+    .divider { height: 1px; background: var(--border); margin: 1.5rem 0; }
+
+    /* AMENITIES */
+    .amenities-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: .75rem; }
+    .amenity {
+      display: flex; align-items: center; gap: .65rem;
+      font-size: .875rem; color: var(--muted);
+    }
+    .amenity .a-icon {
+      width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+      background: var(--card2); border: 1px solid var(--border2);
+      display: flex; align-items: center; justify-content: center; font-size: 1rem;
+    }
+    .amenity strong { display: block; color: var(--text); font-size: .82rem; }
+
+    /* SECTION TITLE */
+    .section-title { font-size: 1.05rem; font-weight: 800; margin-bottom: 1rem; }
+
+    /* DATE PICKER */
+    .date-strip { display: flex; gap: .5rem; overflow-x: auto; padding-bottom: .5rem; scrollbar-width: none; }
+    .date-strip::-webkit-scrollbar { display: none; }
+    .date-chip {
+      flex-shrink: 0; width: 58px; border-radius: 12px;
+      border: 1.5px solid var(--border2); padding: .6rem .25rem;
+      text-align: center; cursor: pointer; transition: all .2s;
+    }
+    .date-chip .dc-day { font-size: .7rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+    .date-chip .dc-num { font-size: 1.2rem; font-weight: 800; }
+    .date-chip .dc-mes { font-size: .65rem; color: var(--muted); }
+    .date-chip.active { background: var(--green); border-color: var(--green); }
+    .date-chip.active .dc-day, .date-chip.active .dc-mes { color: rgba(255,255,255,.75); }
+    .date-chip:hover:not(.active) { border-color: var(--green); }
+
+    /* TIME SLOTS */
+    .slots-wrap { margin-top: 1.25rem; }
+    .slots-label { font-size: .75rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: .65rem; }
+    .slots-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6rem; }
+    .slot {
+      border: 1.5px solid var(--border2); border-radius: 10px;
+      padding: .7rem .5rem; text-align: center; cursor: pointer;
+      transition: all .2s; position: relative;
+    }
+    .slot .s-time { font-size: .9rem; font-weight: 700; }
+    .slot .s-dur  { font-size: .7rem; color: var(--muted); margin-top: .15rem; }
+    .slot .s-price { font-size: .75rem; font-weight: 700; color: var(--green); margin-top: .2rem; }
+    .slot.free:hover { border-color: var(--green); background: rgba(34,197,94,.06); }
+    .slot.free.selected { border-color: var(--green); background: rgba(34,197,94,.12); }
+    .slot.taken { opacity: .45; cursor: not-allowed; }
+    .slot.taken .s-time { text-decoration: line-through; }
+    .slot.taken .s-dur { color: var(--red); font-size: .68rem; }
+    .slot.taken::after {
+      content: 'Reservado'; position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .68rem; font-weight: 700; color: var(--red);
+      background: rgba(239,68,68,.06); border-radius: 8px;
+    }
+
+    /* DESCRIPTION */
+    .description { color: var(--muted); font-size: .9rem; line-height: 1.75; }
+    .description.collapsed { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .show-more { color: var(--green); font-size: .875rem; font-weight: 600; cursor: pointer; margin-top: .5rem; display: inline-block; }
+
+    /* REVIEWS */
+    .rating-summary {
+      display: flex; align-items: center; gap: 1.25rem;
+      background: var(--card2); border: 1px solid var(--border2);
+      border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem;
+    }
+    .rating-big { text-align: center; }
+    .rating-num { font-size: 3rem; font-weight: 900; line-height: 1; color: var(--text); }
+    .rating-stars-big { color: #fbbf24; font-size: 1.1rem; margin: .25rem 0; }
+    .rating-count { font-size: .75rem; color: var(--muted); }
+    .rating-bars { flex: 1; display: flex; flex-direction: column; gap: .4rem; }
+    .bar-row { display: flex; align-items: center; gap: .6rem; font-size: .75rem; color: var(--muted); }
+    .bar-track { flex: 1; height: 6px; background: var(--border2); border-radius: 3px; overflow: hidden; }
+    .bar-fill { height: 100%; background: #fbbf24; border-radius: 3px; }
+    .review-card {
+      background: var(--card2); border: 1px solid var(--border2);
+      border-radius: var(--radius); padding: 1rem; margin-bottom: .75rem;
+    }
+    .review-header { display: flex; align-items: center; gap: .75rem; margin-bottom: .5rem; }
+    .review-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--card); border: 1px solid var(--border2);
+      display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0;
+    }
+    .review-name { font-weight: 700; font-size: .875rem; }
+    .review-date { font-size: .75rem; color: var(--muted); }
+    .review-stars { color: #fbbf24; font-size: .8rem; }
+    .review-text { font-size: .875rem; color: var(--muted); line-height: 1.65; }
+
+    /* LOCATION */
+    .map-placeholder {
+      background: var(--card2); border: 1px solid var(--border2);
+      border-radius: var(--radius); height: 160px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      color: var(--muted); gap: .5rem; font-size: .875rem; cursor: pointer;
+    }
+    .map-placeholder:hover { border-color: var(--green); }
+    .map-placeholder .map-icon { font-size: 2rem; }
+    .map-addr { font-size: .8rem; font-weight: 600; color: var(--text); }
+
+    /* STICKY BOTTOM BAR */
+    .sticky-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+      background: var(--card); border-top: 1px solid var(--border2);
+      padding: .9rem 1.25rem;
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+      backdrop-filter: blur(12px);
+    }
+    .sticky-price { }
+    .sticky-price .amount { font-size: 1.3rem; font-weight: 900; color: var(--green); }
+    .sticky-price .per { font-size: .78rem; color: var(--muted); }
+    .sticky-price .selected-time { font-size: .8rem; color: var(--text); font-weight: 600; margin-top: .1rem; }
+    .btn-reserve {
+      flex: 1; max-width: 240px;
+      background: var(--green); color: #fff; border: none;
+      padding: .85rem 1.5rem; border-radius: 12px;
+      font-size: 1rem; font-weight: 800; cursor: pointer;
+      transition: background .2s, transform .15s;
+      box-shadow: 0 0 20px rgba(34,197,94,.3);
+    }
+    .btn-reserve:hover { background: var(--green-d); transform: translateY(-1px); }
+    .btn-reserve:disabled { background: var(--card2); color: var(--muted); box-shadow: none; cursor: not-allowed; transform: none; }
+
+    /* BOOKING DRAWER */
+    .drawer-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.65);
+      backdrop-filter: blur(4px); z-index: 300;
+      display: none; align-items: flex-end;
+    }
+    .drawer-overlay.open { display: flex; }
+    .drawer {
+      background: var(--card); border-top: 1px solid var(--border2);
+      border-radius: 20px 20px 0 0;
+      width: 100%; max-height: 88vh; overflow-y: auto;
+      padding: 1.5rem 1.25rem 2rem;
+      animation: slideUp .3s ease;
+    }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .drawer-handle {
+      width: 40px; height: 4px; background: var(--border2);
+      border-radius: 2px; margin: 0 auto 1.5rem;
+    }
+    .drawer-title { font-size: 1.15rem; font-weight: 800; margin-bottom: .3rem; }
+    .drawer-sub { color: var(--muted); font-size: .85rem; margin-bottom: 1.5rem; }
+    .booking-summary {
+      background: var(--card2); border: 1px solid var(--border2);
+      border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem;
+    }
+    .bs-row { display: flex; justify-content: space-between; align-items: center; padding: .4rem 0; }
+    .bs-row:not(:last-child) { border-bottom: 1px solid var(--border); }
+    .bs-label { font-size: .8rem; color: var(--muted); }
+    .bs-val { font-size: .875rem; font-weight: 600; }
+    .bs-total .bs-label { font-weight: 700; color: var(--text); font-size: .875rem; }
+    .bs-total .bs-val { color: var(--green); font-size: 1.1rem; font-weight: 900; }
+    .d-field { margin-bottom: 1rem; }
+    .d-field label { display: block; font-size: .8rem; font-weight: 700; color: var(--muted); margin-bottom: .4rem; }
+    .d-field input {
+      width: 100%; background: var(--card2);
+      border: 1.5px solid var(--border2); border-radius: 10px;
+      color: var(--text); padding: .75rem 1rem;
+      font-size: .925rem; font-family: inherit; outline: none;
+      transition: border-color .2s;
+    }
+    .d-field input:focus { border-color: var(--green); }
+    .payment-methods { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6rem; margin-bottom: 1.25rem; }
+    .pay-opt {
+      border: 1.5px solid var(--border2); border-radius: 10px;
+      padding: .75rem .5rem; text-align: center; cursor: pointer;
+      font-size: .75rem; font-weight: 700; color: var(--muted); transition: all .2s;
+    }
+    .pay-opt .pay-icon { font-size: 1.4rem; display: block; margin-bottom: .25rem; }
+    .pay-opt.selected { border-color: var(--green); color: var(--green); background: rgba(34,197,94,.08); }
+    .btn-pay {
+      width: 100%; background: var(--green); color: #fff; border: none;
+      padding: .95rem; border-radius: 12px; font-size: 1.05rem;
+      font-weight: 800; cursor: pointer; transition: background .2s;
+    }
+    .btn-pay:hover { background: var(--green-d); }
+    .pay-note { text-align: center; font-size: .75rem; color: var(--muted); margin-top: .75rem; }
+
+    /* CONFIRMATION */
+    .confirm-screen { display: none; text-align: center; padding: 1rem 0; }
+    .confirm-screen.show { display: block; }
+    .confirm-icon { font-size: 3.5rem; margin-bottom: .75rem; }
+    .confirm-screen h3 { font-size: 1.3rem; font-weight: 900; margin-bottom: .4rem; }
+    .confirm-screen p { color: var(--muted); font-size: .875rem; line-height: 1.7; margin-bottom: 1.5rem; }
+    .confirm-code {
+      background: var(--card2); border: 1px solid var(--border2);
+      border-radius: 10px; padding: 1rem; margin-bottom: 1.25rem;
+      font-family: monospace; font-size: 1.1rem; font-weight: 700; letter-spacing: .1em; color: var(--green);
+    }
+    .btn-close-drawer {
+      width: 100%; background: var(--card2); color: var(--text); border: 1px solid var(--border2);
+      padding: .85rem; border-radius: 12px; font-size: .95rem; font-weight: 700; cursor: pointer;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 500px) {
+      .slots-grid { grid-template-columns: repeat(2, 1fr); }
+      .amenities-grid { grid-template-columns: 1fr; }
+      .payment-methods { grid-template-columns: repeat(3, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="logo">⚽ CanchaGo</a>
+  <button class="nav-share" onclick="shareCancha()" aria-label="Compartir cancha">
+    ↑ Compartir
+  </button>
+</nav>
+
+<!-- GALLERY -->
+<div class="gallery" role="img" aria-label="Fotos de la cancha">
+  <div class="gallery-main">⚽<div class="photo-badge">📷 Ver fotos</div></div>
+  <div class="gallery-sm">🏟️</div>
+  <div class="gallery-sm">
+    🌙
+    <div class="gallery-more">+4 fotos</div>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<main class="content">
+
+  <!-- HEADER -->
+  <div class="court-header">
+    <div class="court-tags">
+      <span class="tag available">● Disponible hoy</span>
+      <span class="tag">⚽ Fútbol 5</span>
+      <span class="tag">🌿 Césped sintético</span>
+      <span class="tag">💡 Con iluminación</span>
+    </div>
+    <h1 class="court-name">Cancha Central El Nogal</h1>
+    <div class="court-meta">
+      <span><span class="rating-stars">★★★★★</span> 4.8 <span style="color:var(--border2)">(62 reseñas)</span></span>
+      <span>📍 Usaquén, Bogotá</span>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- AMENITIES -->
+  <h2 class="section-title">Lo que incluye</h2>
+  <div class="amenities-grid">
+    <div class="amenity"><div class="a-icon">🌿</div><div><strong>Césped sintético</strong>Último mantenimiento: hace 2 semanas</div></div>
+    <div class="amenity"><div class="a-icon">💡</div><div><strong>Iluminación LED</strong>Disponible hasta las 11 pm</div></div>
+    <div class="amenity"><div class="a-icon">🚿</div><div><strong>Vestieres y baños</strong>Duchas calientes disponibles</div></div>
+    <div class="amenity"><div class="a-icon">🅿️</div><div><strong>Parqueadero</strong>Cupo limitado, gratis</div></div>
+    <div class="amenity"><div class="a-icon">🦺</div><div><strong>Chalecos incluidos</strong>2 equipos de 5 jugadores</div></div>
+    <div class="amenity"><div class="a-icon">⚽</div><div><strong>Balón incluido</strong>Balón profesional N°4</div></div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- AVAILABILITY -->
+  <h2 class="section-title">Disponibilidad</h2>
+
+  <div class="date-strip" id="dateStrip" role="listbox" aria-label="Seleccionar fecha"></div>
+
+  <div class="slots-wrap">
+    <div class="slots-label" id="slotsLabel">Turnos para hoy</div>
+    <div class="slots-grid" id="slotsGrid" role="listbox" aria-label="Turnos disponibles"></div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- DESCRIPTION -->
+  <h2 class="section-title">Sobre la cancha</h2>
+  <p class="description collapsed" id="desc">
+    Cancha Central El Nogal es uno de los espacios deportivos más completos de Usaquén. Contamos con césped sintético de última generación, iluminación LED para partidos nocturnos, vestieres con duchas calientes, y parqueadero gratuito. Llevamos más de 8 años siendo el punto de encuentro de las ligas amateur del norte de Bogotá. Capacidad para equipos de 5 jugadores por lado. Ideal para partidos entre amigos, torneos corporativos y entrenamientos.
+  </p>
+  <span class="show-more" id="showMore" onclick="toggleDesc()">Leer más ↓</span>
+
+  <div class="divider"></div>
+
+  <!-- REVIEWS -->
+  <h2 class="section-title">Reseñas</h2>
+
+  <div class="rating-summary">
+    <div class="rating-big">
+      <div class="rating-num">4.8</div>
+      <div class="rating-stars-big">★★★★★</div>
+      <div class="rating-count">62 reseñas</div>
+    </div>
+    <div class="rating-bars">
+      <div class="bar-row">5★ <div class="bar-track"><div class="bar-fill" style="width:82%"></div></div> 82%</div>
+      <div class="bar-row">4★ <div class="bar-track"><div class="bar-fill" style="width:12%"></div></div> 12%</div>
+      <div class="bar-row">3★ <div class="bar-track"><div class="bar-fill" style="width:4%"></div></div> 4%</div>
+      <div class="bar-row">2★ <div class="bar-track"><div class="bar-fill" style="width:1%"></div></div> 1%</div>
+      <div class="bar-row">1★ <div class="bar-track"><div class="bar-fill" style="width:1%"></div></div> 1%</div>
+    </div>
+  </div>
+
+  <div class="review-card">
+    <div class="review-header">
+      <div class="review-avatar">👨</div>
+      <div>
+        <div class="review-name">Andrés M.</div>
+        <div class="review-date">Hace 3 días · <span class="review-stars">★★★★★</span></div>
+      </div>
+    </div>
+    <p class="review-text">Excelente cancha, el césped está en perfecto estado. Reservé online en 2 minutos y el proceso fue super fácil. La iluminación nocturna es muy buena. Volvemos el próximo sábado.</p>
+  </div>
+
+  <div class="review-card">
+    <div class="review-header">
+      <div class="review-avatar">👩</div>
+      <div>
+        <div class="review-name">Valentina R.</div>
+        <div class="review-date">Hace 1 semana · <span class="review-stars">★★★★★</span></div>
+      </div>
+    </div>
+    <p class="review-text">Muy buena experiencia desde la reserva hasta el partido. El parqueadero es un plus enorme en Usaquén. Los baños bien limpios. Totalmente recomendada.</p>
+  </div>
+
+  <div class="review-card">
+    <div class="review-header">
+      <div class="review-avatar">👦</div>
+      <div>
+        <div class="review-name">Felipe C.</div>
+        <div class="review-date">Hace 2 semanas · <span class="review-stars">★★★★☆</span></div>
+      </div>
+    </div>
+    <p class="review-text">Muy buena cancha. Le doy 4 estrellas porque el balón estaba un poco desinflado, pero el encargado lo resolvió enseguida. Todo lo demás perfecto.</p>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- LOCATION -->
+  <h2 class="section-title">Ubicación</h2>
+  <div class="map-placeholder" onclick="openMaps()">
+    <div class="map-icon">🗺️</div>
+    <div class="map-addr">Cra 7 #119-52, Usaquén</div>
+    <span style="font-size:.8rem;color:var(--green);font-weight:600">Abrir en Google Maps →</span>
+  </div>
+
+</main>
+
+<!-- STICKY BOTTOM BAR -->
+<div class="sticky-bar">
+  <div class="sticky-price">
+    <div><span class="amount">$80.000</span> <span class="per">COP / hora</span></div>
+    <div class="selected-time" id="stickyTime">Selecciona un turno</div>
+  </div>
+  <button class="btn-reserve" id="btnReserve" onclick="openDrawer()" disabled>
+    Reservar turno
+  </button>
+</div>
+
+<!-- BOOKING DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawerOnBg(event)">
+  <div class="drawer" id="drawer">
+    <div class="drawer-handle"></div>
+
+    <!-- FORM -->
+    <div id="drawerForm">
+      <div class="drawer-title">Confirmar reserva</div>
+      <div class="drawer-sub" id="drawerSubtitle">Cancha Central El Nogal</div>
+
+      <div class="booking-summary" id="bookingSummary"></div>
+
+      <div class="d-field">
+        <label>Tu nombre</label>
+        <input type="text" id="d-nombre" placeholder="Andrés Martínez" autocomplete="name" />
+      </div>
+      <div class="d-field">
+        <label>Celular (recibe la confirmación)</label>
+        <input type="tel" id="d-cel" placeholder="300 123 4567" autocomplete="tel" />
+      </div>
+      <div class="d-field">
+        <label>Correo electrónico</label>
+        <input type="email" id="d-email" placeholder="andres@gmail.com" autocomplete="email" />
+      </div>
+
+      <div class="d-field" style="margin-bottom:.75rem">
+        <label>Método de pago</label>
+      </div>
+      <div class="payment-methods" id="payMethods">
+        <div class="pay-opt selected" onclick="selectPay(this)"><span class="pay-icon">🏦</span>PSE</div>
+        <div class="pay-opt" onclick="selectPay(this)"><span class="pay-icon">💚</span>Nequi</div>
+        <div class="pay-opt" onclick="selectPay(this)"><span class="pay-icon">💳</span>Tarjeta</div>
+      </div>
+
+      <button class="btn-pay" onclick="confirmBooking()">Pagar y reservar →</button>
+      <p class="pay-note">🔒 Pago seguro. Si cancelas con 24h de anticipación, reembolso total.</p>
+    </div>
+
+    <!-- CONFIRMATION -->
+    <div class="confirm-screen" id="confirmScreen">
+      <div class="confirm-icon">🎉</div>
+      <h3>¡Reserva confirmada!</h3>
+      <p>Te enviamos el comprobante al celular y al correo. Preséntate 10 minutos antes con este código.</p>
+      <div class="confirm-code" id="confirmCode">CGO-28491</div>
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:1.25rem">
+        📅 <strong id="c-fecha"></strong> &nbsp;·&nbsp; ⏰ <strong id="c-hora"></strong><br/>
+        📍 Cra 7 #119-52, Usaquén
+      </p>
+      <button class="btn-close-drawer" onclick="closeDrawer()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ===== STATE ===== */
+  let selectedDate = null;
+  let selectedSlot = null;
+  let selectedPay = 'PSE';
+
+  /* ===== DATES ===== */
+  const DAYS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  const MONTHS = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+
+  function buildDates() {
+    const strip = document.getElementById('dateStrip');
+    const today = new Date();
+    strip.innerHTML = '';
+    for (let i = 0; i < 10; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      const chip = document.createElement('div');
+      chip.className = 'date-chip' + (i === 0 ? ' active' : '');
+      chip.setAttribute('role', 'option');
+      chip.setAttribute('aria-selected', i === 0);
+      chip.innerHTML = `
+        <div class="dc-day">${DAYS[d.getDay()]}</div>
+        <div class="dc-num">${d.getDate()}</div>
+        <div class="dc-mes">${MONTHS[d.getMonth()]}</div>`;
+      chip.dataset.date = d.toISOString().split('T')[0];
+      chip.dataset.label = (i === 0 ? 'Hoy' : i === 1 ? 'Mañana' : DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()]);
+      chip.onclick = () => selectDate(chip);
+      strip.appendChild(chip);
+    }
+    selectDate(strip.firstChild);
+  }
+
+  function selectDate(chip) {
+    document.querySelectorAll('.date-chip').forEach(c => { c.classList.remove('active'); c.setAttribute('aria-selected', false); });
+    chip.classList.add('active');
+    chip.setAttribute('aria-selected', true);
+    selectedDate = chip.dataset;
+    document.getElementById('slotsLabel').textContent = 'Turnos para ' + chip.dataset.label.toLowerCase();
+    buildSlots(chip.dataset.date);
+    clearSlot();
+  }
+
+  /* ===== SLOTS ===== */
+  const TAKEN_BASE = { 0: [0,3,6], 1: [1,4], 2: [0,2,5,7], 3: [3,6], 4: [1,2], 5: [0,4,7], 6: [2,5] };
+  const TIMES = ['06:00','07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'];
+
+  function buildSlots(dateStr) {
+    const d = new Date(dateStr);
+    const dow = d.getDay();
+    const takenIdx = TAKEN_BASE[dow] || [];
+    const now = new Date();
+    const isToday = dateStr === now.toISOString().split('T')[0];
+    const grid = document.getElementById('slotsGrid');
+    grid.innerHTML = '';
+
+    TIMES.forEach((t, i) => {
+      const [h] = t.split(':').map(Number);
+      const pastToday = isToday && h <= now.getHours();
+      const taken = takenIdx.includes(i) || pastToday;
+      const el = document.createElement('div');
+      el.className = 'slot ' + (taken ? 'taken' : 'free');
+      el.setAttribute('role', 'option');
+      el.setAttribute('aria-disabled', taken);
+      el.innerHTML = `
+        <div class="s-time">${formatHour(h)}</div>
+        <div class="s-dur">${taken && pastToday ? 'Pasado' : '1 hora'}</div>
+        ${taken ? '' : '<div class="s-price">$80.000</div>'}`;
+      if (!taken) el.onclick = () => selectSlot(el, t, h);
+      grid.appendChild(el);
+    });
+  }
+
+  function formatHour(h) {
+    if (h === 12) return '12 pm';
+    return h < 12 ? h + ' am' : (h - 12) + ' pm';
+  }
+
+  function selectSlot(el, time, h) {
+    document.querySelectorAll('.slot.free').forEach(s => s.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedSlot = { time, label: formatHour(h) };
+    document.getElementById('stickyTime').textContent = '📅 ' + selectedDate.label + ' · ⏰ ' + selectedSlot.label;
+    const btn = document.getElementById('btnReserve');
+    btn.disabled = false;
+    btn.textContent = 'Reservar ' + selectedSlot.label;
+    el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+
+  function clearSlot() {
+    selectedSlot = null;
+    document.getElementById('stickyTime').textContent = 'Selecciona un turno';
+    const btn = document.getElementById('btnReserve');
+    btn.disabled = true;
+    btn.textContent = 'Reservar turno';
+  }
+
+  /* ===== DRAWER ===== */
+  function openDrawer() {
+    if (!selectedSlot) return;
+    document.getElementById('bookingSummary').innerHTML = `
+      <div class="bs-row"><span class="bs-label">Cancha</span><span class="bs-val">El Nogal — Fútbol 5</span></div>
+      <div class="bs-row"><span class="bs-label">Fecha</span><span class="bs-val">${selectedDate.label}</span></div>
+      <div class="bs-row"><span class="bs-label">Horario</span><span class="bs-val">${selectedSlot.label} (1 hora)</span></div>
+      <div class="bs-row bs-total"><span class="bs-label">Total</span><span class="bs-val">$80.000 COP</span></div>`;
+    document.getElementById('drawerForm').style.display = 'block';
+    document.getElementById('confirmScreen').classList.remove('show');
+    document.getElementById('drawerOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('d-nombre').focus(), 400);
+  }
+
+  function closeDrawer() {
+    document.getElementById('drawerOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function closeDrawerOnBg(e) { if (e.target === document.getElementById('drawerOverlay')) closeDrawer(); }
+
+  /* ===== PAYMENT ===== */
+  function selectPay(el) {
+    document.querySelectorAll('.pay-opt').forEach(p => p.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedPay = el.textContent.trim();
+  }
+
+  /* ===== CONFIRM ===== */
+  function confirmBooking() {
+    const nombre = document.getElementById('d-nombre').value.trim();
+    const cel = document.getElementById('d-cel').value.trim();
+    if (!nombre) { document.getElementById('d-nombre').focus(); return; }
+    if (!cel) { document.getElementById('d-cel').focus(); return; }
+    const code = 'CGO-' + Math.floor(10000 + Math.random() * 90000);
+    document.getElementById('confirmCode').textContent = code;
+    document.getElementById('c-fecha').textContent = selectedDate.label;
+    document.getElementById('c-hora').textContent = selectedSlot.label;
+    document.getElementById('drawerForm').style.display = 'none';
+    document.getElementById('confirmScreen').classList.add('show');
+    // Mark slot as taken visually
+    document.querySelectorAll('.slot.selected').forEach(s => {
+      s.classList.remove('free', 'selected');
+      s.classList.add('taken');
+      s.onclick = null;
+    });
+    clearSlot();
+  }
+
+  /* ===== DESCRIPTION ===== */
+  let descExpanded = false;
+  function toggleDesc() {
+    descExpanded = !descExpanded;
+    const d = document.getElementById('desc');
+    d.classList.toggle('collapsed', !descExpanded);
+    document.getElementById('showMore').textContent = descExpanded ? 'Ver menos ↑' : 'Leer más ↓';
+  }
+
+  /* ===== SHARE ===== */
+  function shareCancha() {
+    if (navigator.share) {
+      navigator.share({ title: 'Cancha Central El Nogal', text: 'Reserva tu turno en El Nogal, Usaquén', url: window.location.href });
+    } else {
+      navigator.clipboard?.writeText(window.location.href);
+      alert('Link copiado al portapapeles');
+    }
+  }
+
+  /* ===== MAPS ===== */
+  function openMaps() {
+    window.open('https://maps.google.com/?q=Cra+7+%23119-52,+Usaquén,+Bogotá', '_blank');
+  }
+
+  /* ===== INIT ===== */
+  buildDates();
+</script>
+</body>
+</html>
