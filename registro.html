@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registra tu cancha | CanchaGo Bogotá</title>
+  <meta name="description" content="Registra tu cancha deportiva en CanchaGo y empieza a recibir reservas y pagos en línea desde hoy. Gratis los primeros 3 meses." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://canchago.co/registro" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --green:   #22c55e;
+      --green-d: #16a34a;
+      --green-l: #dcfce7;
+      --dark:    #0a0f1e;
+      --card:    #111827;
+      --card2:   #1f2937;
+      --border:  #1f2937;
+      --border2: #374151;
+      --muted:   #9ca3af;
+      --text:    #f9fafb;
+      --red:     #ef4444;
+      --radius:  14px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--dark); color: var(--text); min-height: 100vh; }
+    a { color: inherit; text-decoration: none; }
+
+    /* NAV */
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.5rem; height: 60px;
+      background: rgba(10,15,30,.9); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100;
+    }
+    .logo { font-weight: 900; font-size: 1.2rem; color: var(--green); }
+    .nav-back { color: var(--muted); font-size: .875rem; font-weight: 500; display: flex; align-items: center; gap: .4rem; }
+    .nav-back:hover { color: var(--text); }
+
+    /* LAYOUT */
+    .page {
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      min-height: calc(100vh - 60px);
+    }
+
+    /* LEFT PANEL */
+    .left {
+      background: linear-gradient(160deg, rgba(34,197,94,.08) 0%, transparent 50%);
+      border-right: 1px solid var(--border);
+      padding: 3rem 2.5rem;
+      display: flex; flex-direction: column; justify-content: center;
+    }
+    .left-badge {
+      display: inline-flex; align-items: center; gap: .45rem;
+      background: rgba(34,197,94,.1); border: 1px solid rgba(34,197,94,.25);
+      color: var(--green); font-size: .78rem; font-weight: 700;
+      padding: .35rem .9rem; border-radius: 9999px; margin-bottom: 1.5rem;
+      text-transform: uppercase; letter-spacing: .06em;
+    }
+    .left h1 { font-size: clamp(1.8rem, 3vw, 2.5rem); font-weight: 900; line-height: 1.2; margin-bottom: .75rem; }
+    .left h1 em { font-style: normal; color: var(--green); }
+    .left > p { color: var(--muted); font-size: 1rem; line-height: 1.7; margin-bottom: 2.5rem; max-width: 420px; }
+    .benefits { display: flex; flex-direction: column; gap: .85rem; }
+    .benefit { display: flex; align-items: flex-start; gap: .85rem; }
+    .benefit-icon {
+      width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+      background: rgba(34,197,94,.1); border: 1px solid rgba(34,197,94,.2);
+      display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+    }
+    .benefit-text strong { display: block; font-size: .95rem; margin-bottom: .15rem; }
+    .benefit-text span { color: var(--muted); font-size: .85rem; line-height: 1.55; }
+
+    /* RIGHT PANEL — FORM */
+    .right { padding: 2.5rem 2rem; overflow-y: auto; }
+
+    /* STEPPER */
+    .stepper {
+      display: flex; align-items: center; gap: 0; margin-bottom: 2rem;
+    }
+    .step-dot {
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .step-dot .num {
+      width: 30px; height: 30px; border-radius: 50%;
+      border: 2px solid var(--border2); color: var(--muted);
+      font-size: .8rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .3s;
+    }
+    .step-dot .lbl { font-size: .78rem; font-weight: 600; color: var(--muted); white-space: nowrap; transition: color .3s; }
+    .step-dot.active .num { background: var(--green); border-color: var(--green); color: #fff; }
+    .step-dot.active .lbl { color: var(--text); }
+    .step-dot.done .num { background: rgba(34,197,94,.15); border-color: var(--green); color: var(--green); }
+    .step-dot.done .lbl { color: var(--muted); }
+    .step-line { flex: 1; height: 2px; background: var(--border2); margin: 0 .5rem; transition: background .3s; }
+    .step-line.done { background: var(--green); }
+
+    /* FORM PANELS */
+    .form-panel { display: none; }
+    .form-panel.active { display: block; }
+    .form-panel h2 { font-size: 1.25rem; font-weight: 800; margin-bottom: .4rem; }
+    .form-panel .sub { color: var(--muted); font-size: .875rem; margin-bottom: 1.75rem; line-height: 1.6; }
+
+    /* FIELDS */
+    .field { margin-bottom: 1.1rem; }
+    .field label {
+      display: block; font-size: .8rem; font-weight: 700;
+      color: var(--muted); margin-bottom: .45rem; letter-spacing: .02em;
+    }
+    .field label .req { color: var(--green); }
+    .field input, .field select, .field textarea {
+      width: 100%; background: var(--card2);
+      border: 1.5px solid var(--border2); border-radius: 10px;
+      color: var(--text); padding: .75rem 1rem;
+      font-size: .925rem; font-family: inherit; outline: none;
+      transition: border-color .2s;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--green); }
+    .field input.error, .field select.error { border-color: var(--red); }
+    .field .error-msg { color: var(--red); font-size: .75rem; margin-top: .35rem; display: none; }
+    .field.has-error .error-msg { display: block; }
+    .field textarea { resize: vertical; min-height: 90px; }
+    .field select option { background: var(--card2); }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+    .field .hint { color: var(--muted); font-size: .75rem; margin-top: .35rem; }
+
+    /* SPORT CHIPS */
+    .sport-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6rem; }
+    .sport-chip {
+      border: 1.5px solid var(--border2); border-radius: 10px;
+      padding: .65rem .5rem; text-align: center; cursor: pointer;
+      font-size: .8rem; font-weight: 600; color: var(--muted);
+      transition: all .2s; user-select: none;
+    }
+    .sport-chip .emoji { display: block; font-size: 1.4rem; margin-bottom: .3rem; }
+    .sport-chip.selected { border-color: var(--green); color: var(--green); background: rgba(34,197,94,.08); }
+
+    /* SCHEDULE */
+    .schedule-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .5rem; }
+    .time-chip {
+      border: 1.5px solid var(--border2); border-radius: 8px;
+      padding: .5rem .25rem; text-align: center; cursor: pointer;
+      font-size: .75rem; font-weight: 600; color: var(--muted);
+      transition: all .2s; user-select: none;
+    }
+    .time-chip.selected { border-color: var(--green); color: var(--green); background: rgba(34,197,94,.08); }
+    .schedule-label { font-size: .75rem; font-weight: 700; color: var(--muted); margin-bottom: .5rem; margin-top: 1rem; text-transform: uppercase; letter-spacing: .05em; }
+
+    /* PRICE */
+    .price-input { position: relative; }
+    .price-input .currency {
+      position: absolute; left: .95rem; top: 50%; transform: translateY(-50%);
+      color: var(--muted); font-size: .875rem; font-weight: 600; pointer-events: none;
+    }
+    .price-input input { padding-left: 2.5rem; }
+
+    /* ACTIONS */
+    .form-actions { display: flex; gap: .75rem; margin-top: 1.5rem; }
+    .btn-back {
+      flex: 1; background: none; border: 1.5px solid var(--border2);
+      color: var(--text); padding: .8rem; border-radius: 10px;
+      font-size: .95rem; font-weight: 600; cursor: pointer;
+      transition: border-color .2s;
+    }
+    .btn-back:hover { border-color: var(--green); }
+    .btn-next {
+      flex: 2; background: var(--green); color: #fff; border: none;
+      padding: .8rem; border-radius: 10px;
+      font-size: .95rem; font-weight: 700; cursor: pointer;
+      transition: background .2s, transform .15s;
+    }
+    .btn-next:hover { background: var(--green-d); transform: translateY(-1px); }
+    .btn-next:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+    /* SUCCESS */
+    .success { display: none; text-align: center; padding: 2rem 0; }
+    .success.show { display: block; }
+    .success-icon { font-size: 4rem; margin-bottom: 1rem; }
+    .success h2 { font-size: 1.5rem; font-weight: 900; margin-bottom: .5rem; }
+    .success p { color: var(--muted); font-size: .95rem; line-height: 1.7; margin-bottom: 1.75rem; max-width: 320px; margin-left: auto; margin-right: auto; }
+    .success-link {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: var(--card2); border: 1px solid var(--border2);
+      border-radius: 10px; padding: .8rem 1.25rem;
+      font-size: .875rem; font-weight: 600; margin-bottom: 1rem;
+      cursor: pointer; color: var(--text);
+    }
+    .success-link .url { color: var(--green); font-family: monospace; }
+    .btn-dashboard {
+      display: block; width: 100%;
+      background: var(--green); color: #fff; border: none;
+      padding: .9rem; border-radius: 10px;
+      font-size: 1rem; font-weight: 700; cursor: pointer;
+      transition: background .2s;
+    }
+    .btn-dashboard:hover { background: var(--green-d); }
+
+    /* RESPONSIVE */
+    @media (max-width: 820px) {
+      .page { grid-template-columns: 1fr; }
+      .left { display: none; }
+      .right { padding: 2rem 1.25rem; }
+    }
+    @media (max-width: 400px) {
+      .sport-grid { grid-template-columns: repeat(2, 1fr); }
+      .schedule-grid { grid-template-columns: repeat(3, 1fr); }
+      .field-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">⚽ CanchaGo</a>
+  <a href="index.html" class="nav-back">← Volver al inicio</a>
+</nav>
+
+<div class="page">
+
+  <!-- LEFT PANEL -->
+  <aside class="left" aria-hidden="true">
+    <div class="left-badge">✦ Registro gratuito</div>
+    <h1>Configura tu cancha<br/>en <em>10 minutos</em></h1>
+    <p>Sin contrato, sin tarjeta de crédito. Empieza a recibir reservas y pagos en línea desde hoy mismo.</p>
+    <div class="benefits">
+      <div class="benefit">
+        <div class="benefit-icon">📅</div>
+        <div class="benefit-text">
+          <strong>Calendario automático</strong>
+          <span>Tus horarios disponibles, actualizados en tiempo real.</span>
+        </div>
+      </div>
+      <div class="benefit">
+        <div class="benefit-icon">💳</div>
+        <div class="benefit-text">
+          <strong>Pagos con PSE y Nequi</strong>
+          <span>El dinero llega directo a tu cuenta bancaria.</span>
+        </div>
+      </div>
+      <div class="benefit">
+        <div class="benefit-icon">🔗</div>
+        <div class="benefit-text">
+          <strong>Tu link único</strong>
+          <span>Comparte <strong style="color:var(--green)">canchago.co/tucancha</strong> por WhatsApp o Instagram.</span>
+        </div>
+      </div>
+      <div class="benefit">
+        <div class="benefit-icon">🔔</div>
+        <div class="benefit-text">
+          <strong>0% comisión por 3 meses</strong>
+          <span>Gratis durante tu periodo de lanzamiento en Bogotá.</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- RIGHT PANEL -->
+  <main class="right" id="formArea">
+
+    <!-- STEPPER -->
+    <div class="stepper" role="progressbar" aria-label="Paso del formulario">
+      <div class="step-dot active" id="dot1">
+        <div class="num">1</div>
+        <div class="lbl">Tu cuenta</div>
+      </div>
+      <div class="step-line" id="line1"></div>
+      <div class="step-dot" id="dot2">
+        <div class="num">2</div>
+        <div class="lbl">Tu cancha</div>
+      </div>
+      <div class="step-line" id="line2"></div>
+      <div class="step-dot" id="dot3">
+        <div class="num">3</div>
+        <div class="lbl">Horarios</div>
+      </div>
+    </div>
+
+    <!-- PASO 1: CUENTA -->
+    <div class="form-panel active" id="panel1">
+      <h2>Crea tu cuenta</h2>
+      <p class="sub">Datos del responsable de la cancha. Así te contactamos si necesitas ayuda.</p>
+
+      <div class="field-row">
+        <div class="field" id="f-nombre">
+          <label>Nombre <span class="req">*</span></label>
+          <input type="text" id="inp-nombre" placeholder="Juan" autocomplete="given-name" />
+          <div class="error-msg">Ingresa tu nombre</div>
+        </div>
+        <div class="field" id="f-apellido">
+          <label>Apellido <span class="req">*</span></label>
+          <input type="text" id="inp-apellido" placeholder="García" autocomplete="family-name" />
+          <div class="error-msg">Ingresa tu apellido</div>
+        </div>
+      </div>
+
+      <div class="field" id="f-email">
+        <label>Correo electrónico <span class="req">*</span></label>
+        <input type="email" id="inp-email" placeholder="juan@gmail.com" autocomplete="email" />
+        <div class="error-msg">Ingresa un correo válido</div>
+      </div>
+
+      <div class="field" id="f-cel">
+        <label>Celular <span class="req">*</span></label>
+        <input type="tel" id="inp-cel" placeholder="300 123 4567" autocomplete="tel" />
+        <div class="error-msg">Ingresa tu número de celular</div>
+      </div>
+
+      <div class="field" id="f-pass">
+        <label>Contraseña <span class="req">*</span></label>
+        <input type="password" id="inp-pass" placeholder="Mínimo 8 caracteres" autocomplete="new-password" />
+        <div class="error-msg">Mínimo 8 caracteres</div>
+      </div>
+
+      <div class="field" id="f-pass2">
+        <label>Confirmar contraseña <span class="req">*</span></label>
+        <input type="password" id="inp-pass2" placeholder="Repite la contraseña" autocomplete="new-password" />
+        <div class="error-msg">Las contraseñas no coinciden</div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-next" onclick="nextStep(1)">Continuar →</button>
+      </div>
+    </div>
+
+    <!-- PASO 2: CANCHA -->
+    <div class="form-panel" id="panel2">
+      <h2>Datos de tu cancha</h2>
+      <p class="sub">Esta información la verán tus clientes al buscar canchas en Bogotá.</p>
+
+      <div class="field" id="f-nomcancha">
+        <label>Nombre de la cancha <span class="req">*</span></label>
+        <input type="text" id="inp-nomcancha" placeholder="Ej: Cancha Central El Nogal" />
+        <div class="error-msg">Ingresa el nombre de tu cancha</div>
+        <div class="hint">Tip: incluye el barrio o sector para que te encuentren más fácil.</div>
+      </div>
+
+      <div class="field" id="f-slug">
+        <label>Tu link personalizado <span class="req">*</span></label>
+        <input type="text" id="inp-slug" placeholder="elnogal" oninput="slugify(this)" />
+        <div class="hint" id="slug-preview">Tu link: <strong style="color:var(--green)">canchago.co/<span id="slug-val">elnogal</span></strong></div>
+        <div class="error-msg">Solo letras, números y guiones. Mínimo 3 caracteres.</div>
+      </div>
+
+      <div class="field" id="f-deporte">
+        <label>Tipo de deporte <span class="req">*</span> <span style="font-weight:400;color:var(--muted)">(elige uno o varios)</span></label>
+        <div class="sport-grid" id="sportGrid">
+          <div class="sport-chip" onclick="toggleSport(this)" data-sport="futbol5"><span class="emoji">⚽</span>Fútbol 5</div>
+          <div class="sport-chip" onclick="toggleSport(this)" data-sport="futbol7"><span class="emoji">⚽</span>Fútbol 7</div>
+          <div class="sport-chip" onclick="toggleSport(this)" data-sport="padel"><span class="emoji">🎾</span>Pádel</div>
+          <div class="sport-chip" onclick="toggleSport(this)" data-sport="tenis"><span class="emoji">🎾</span>Tenis</div>
+          <div class="sport-chip" onclick="toggleSport(this)" data-sport="basquet"><span class="emoji">🏀</span>Básquet</div>
+          <div class="sport-chip" onclick="toggleSport(this)" data-sport="voleibol"><span class="emoji">🏐</span>Voleibol</div>
+        </div>
+        <div class="error-msg" id="sport-error">Selecciona al menos un deporte</div>
+      </div>
+
+      <div class="field" id="f-dir">
+        <label>Dirección en Bogotá <span class="req">*</span></label>
+        <input type="text" id="inp-dir" placeholder="Cra 15 #85-32, Usaquén" />
+        <div class="error-msg">Ingresa la dirección</div>
+      </div>
+
+      <div class="field" id="f-localidad">
+        <label>Localidad <span class="req">*</span></label>
+        <select id="inp-localidad">
+          <option value="">Selecciona la localidad</option>
+          <option>Usaquén</option><option>Chapinero</option><option>Santa Fe</option>
+          <option>San Cristóbal</option><option>Usme</option><option>Tunjuelito</option>
+          <option>Bosa</option><option>Kennedy</option><option>Fontibón</option>
+          <option>Engativá</option><option>Suba</option><option>Barrios Unidos</option>
+          <option>Teusaquillo</option><option>Los Mártires</option><option>Antonio Nariño</option>
+          <option>Puente Aranda</option><option>La Candelaria</option><option>Rafael Uribe Uribe</option>
+          <option>Ciudad Bolívar</option><option>Sumapaz</option>
+        </select>
+        <div class="error-msg">Selecciona la localidad</div>
+      </div>
+
+      <div class="field">
+        <label>Descripción <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
+        <textarea id="inp-desc" placeholder="Ej: Cancha sintética con iluminación, parqueadero, baños y vestieres disponibles..."></textarea>
+      </div>
+
+      <div class="field" id="f-precio">
+        <label>Precio por hora <span class="req">*</span></label>
+        <div class="price-input">
+          <span class="currency">COP $</span>
+          <input type="number" id="inp-precio" placeholder="80.000" min="10000" step="1000" />
+        </div>
+        <div class="error-msg">Ingresa el precio por hora</div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-back" onclick="prevStep(2)">← Atrás</button>
+        <button class="btn-next" onclick="nextStep(2)">Continuar →</button>
+      </div>
+    </div>
+
+    <!-- PASO 3: HORARIOS -->
+    <div class="form-panel" id="panel3">
+      <h2>Horarios disponibles</h2>
+      <p class="sub">Selecciona los días y horas en que tu cancha está disponible para reservar.</p>
+
+      <div class="field">
+        <p class="schedule-label">Días disponibles</p>
+        <div style="display:flex;flex-wrap:wrap;gap:.5rem;" id="daysGrid">
+          <div class="time-chip" onclick="toggleChip(this)" data-val="lun">Lun</div>
+          <div class="time-chip" onclick="toggleChip(this)" data-val="mar">Mar</div>
+          <div class="time-chip" onclick="toggleChip(this)" data-val="mie">Mié</div>
+          <div class="time-chip" onclick="toggleChip(this)" data-val="jue">Jue</div>
+          <div class="time-chip" onclick="toggleChip(this)" data-val="vie">Vie</div>
+          <div class="time-chip selected" onclick="toggleChip(this)" data-val="sab">Sáb</div>
+          <div class="time-chip selected" onclick="toggleChip(this)" data-val="dom">Dom</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <p class="schedule-label">Horario de apertura</p>
+        <div class="schedule-grid" id="openGrid">
+          <div class="time-chip" onclick="selectOpen(this)" data-val="06:00">6 am</div>
+          <div class="time-chip" onclick="selectOpen(this)" data-val="07:00">7 am</div>
+          <div class="time-chip selected" onclick="selectOpen(this)" data-val="08:00">8 am</div>
+          <div class="time-chip" onclick="selectOpen(this)" data-val="09:00">9 am</div>
+          <div class="time-chip" onclick="selectOpen(this)" data-val="10:00">10 am</div>
+          <div class="time-chip" onclick="selectOpen(this)" data-val="11:00">11 am</div>
+          <div class="time-chip" onclick="selectOpen(this)" data-val="12:00">12 pm</div>
+          <div class="time-chip" onclick="selectOpen(this)" data-val="13:00">1 pm</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <p class="schedule-label">Horario de cierre</p>
+        <div class="schedule-grid" id="closeGrid">
+          <div class="time-chip" onclick="selectClose(this)" data-val="18:00">6 pm</div>
+          <div class="time-chip" onclick="selectClose(this)" data-val="19:00">7 pm</div>
+          <div class="time-chip" onclick="selectClose(this)" data-val="20:00">8 pm</div>
+          <div class="time-chip selected" onclick="selectClose(this)" data-val="21:00">9 pm</div>
+          <div class="time-chip" onclick="selectClose(this)" data-val="22:00">10 pm</div>
+          <div class="time-chip" onclick="selectClose(this)" data-val="23:00">11 pm</div>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Duración del turno</label>
+          <select id="inp-duracion">
+            <option value="60">1 hora</option>
+            <option value="90">1.5 horas</option>
+            <option value="120">2 horas</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>¿Tiene iluminación nocturna?</label>
+          <select id="inp-luz">
+            <option value="si">Sí</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-back" onclick="prevStep(3)">← Atrás</button>
+        <button class="btn-next" onclick="submitForm()">Registrar cancha 🎉</button>
+      </div>
+    </div>
+
+    <!-- ÉXITO -->
+    <div class="success" id="successPanel">
+      <div class="success-icon">🎉</div>
+      <h2>¡Tu cancha está lista!</h2>
+      <p>En menos de 24 horas activamos tu perfil y puedes empezar a recibir reservas. Te avisamos al correo.</p>
+      <div class="success-link" onclick="copyLink()">
+        Tu link: <span class="url">canchago.co/<span id="successSlug">tucancha</span></span>
+        <span id="copyTxt">📋 Copiar</span>
+      </div>
+      <button class="btn-dashboard" onclick="window.location.href='index.html'">Volver al inicio</button>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  let currentStep = 1;
+  const selectedSports = new Set();
+  let openTime = '08:00';
+  let closeTime = '21:00';
+
+  /* ===== STEPPER ===== */
+  function goTo(step) {
+    for (let i = 1; i <= 3; i++) {
+      document.getElementById('panel' + i).classList.toggle('active', i === step);
+      const dot = document.getElementById('dot' + i);
+      dot.classList.toggle('active', i === step);
+      dot.classList.toggle('done', i < step);
+    }
+    for (let i = 1; i <= 2; i++) {
+      document.getElementById('line' + i).classList.toggle('done', i < step);
+    }
+    document.getElementById('formArea').scrollTop = 0;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    currentStep = step;
+  }
+
+  function prevStep(step) { goTo(step - 1); }
+
+  /* ===== VALIDACIÓN ===== */
+  function validate1() {
+    let ok = true;
+    const checks = [
+      ['f-nombre', () => document.getElementById('inp-nombre').value.trim().length > 1],
+      ['f-apellido', () => document.getElementById('inp-apellido').value.trim().length > 1],
+      ['f-email', () => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(document.getElementById('inp-email').value)],
+      ['f-cel', () => document.getElementById('inp-cel').value.replace(/\D/g,'').length >= 10],
+      ['f-pass', () => document.getElementById('inp-pass').value.length >= 8],
+      ['f-pass2', () => document.getElementById('inp-pass2').value === document.getElementById('inp-pass').value],
+    ];
+    checks.forEach(([id, fn]) => {
+      const valid = fn();
+      document.getElementById(id).classList.toggle('has-error', !valid);
+      if (!valid) ok = false;
+    });
+    return ok;
+  }
+
+  function validate2() {
+    let ok = true;
+    const checks = [
+      ['f-nomcancha', () => document.getElementById('inp-nomcancha').value.trim().length > 2],
+      ['f-slug', () => /^[a-z0-9-]{3,}$/.test(document.getElementById('inp-slug').value)],
+      ['f-dir', () => document.getElementById('inp-dir').value.trim().length > 5],
+      ['f-localidad', () => document.getElementById('inp-localidad').value !== ''],
+      ['f-precio', () => +document.getElementById('inp-precio').value >= 10000],
+    ];
+    checks.forEach(([id, fn]) => {
+      const valid = fn();
+      document.getElementById(id).classList.toggle('has-error', !valid);
+      if (!valid) ok = false;
+    });
+    const sportOk = selectedSports.size > 0;
+    document.getElementById('f-deporte').classList.toggle('has-error', !sportOk);
+    document.getElementById('sport-error').style.display = sportOk ? 'none' : 'block';
+    if (!sportOk) ok = false;
+    return ok;
+  }
+
+  function nextStep(step) {
+    if (step === 1 && !validate1()) return;
+    if (step === 2 && !validate2()) return;
+    goTo(step + 1);
+  }
+
+  /* ===== SPORTS ===== */
+  function toggleSport(el) {
+    const sport = el.dataset.sport;
+    el.classList.toggle('selected');
+    selectedSports.has(sport) ? selectedSports.delete(sport) : selectedSports.add(sport);
+  }
+
+  /* ===== DAYS ===== */
+  function toggleChip(el) { el.classList.toggle('selected'); }
+
+  /* ===== OPEN / CLOSE TIME ===== */
+  function selectOpen(el) {
+    document.querySelectorAll('#openGrid .time-chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    openTime = el.dataset.val;
+  }
+  function selectClose(el) {
+    document.querySelectorAll('#closeGrid .time-chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    closeTime = el.dataset.val;
+  }
+
+  /* ===== SLUG ===== */
+  function slugify(input) {
+    const val = input.value
+      .toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z0-9-]/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+    input.value = val;
+    document.getElementById('slug-val').textContent = val || 'tucancha';
+  }
+
+  /* ===== SUBMIT ===== */
+  function submitForm() {
+    const slug = document.getElementById('inp-slug').value || 'tucancha';
+    document.getElementById('successSlug').textContent = slug;
+    document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+    document.querySelector('.stepper').style.display = 'none';
+    document.getElementById('successPanel').classList.add('show');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /* ===== COPY LINK ===== */
+  function copyLink() {
+    const slug = document.getElementById('successSlug').textContent;
+    const url = 'https://canchago.co/' + slug;
+    navigator.clipboard?.writeText(url).catch(() => {});
+    document.getElementById('copyTxt').textContent = '✅ Copiado';
+    setTimeout(() => document.getElementById('copyTxt').textContent = '📋 Copiar', 2000);
+  }
+</script>
+</body>
+</html>

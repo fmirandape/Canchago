@@ -123,6 +123,7 @@
     .nav-actions { display: flex; gap: .75rem; align-items: center; }
     .btn-ghost { background: none; border: none; color: var(--muted); font-size: .875rem; font-weight: 500; cursor: pointer; }
     .btn-ghost:hover { color: var(--text); }
+    .btn-cta-link { display: inline-block; }
     .btn-cta {
       background: var(--green); color: #fff; border: none;
       padding: .55rem 1.25rem; border-radius: 10px;
@@ -206,7 +207,7 @@
     .proof-bar {
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
-      padding: 1.5rem 0;
+      padding: 1.25rem 0;
     }
     .proof-inner { text-align: center; }
     .proof-label { font-size: .78rem; font-weight: 600; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 1rem; }
@@ -217,7 +218,7 @@
     }
 
     /* ===== PROBLEM / SOLUTION ===== */
-    .problem-solution { padding: 5rem 0; }
+    .problem-solution { padding: 3rem 0 5rem; }
     .ps-grid {
       display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;
     }
@@ -378,7 +379,7 @@
 
     /* ===== RESPONSIVE ===== */
     @media (max-width: 760px) {
-      .nav-links, .nav-actions .btn-ghost { display: none; }
+      .nav-links, .nav-actions .btn-ghost, .nav-actions .btn-cta { display: none; }
       .hamburger { display: flex; }
       .ps-grid { grid-template-columns: 1fr; }
       .footer-inner { grid-template-columns: 1fr 1fr; }
@@ -409,7 +410,7 @@
     </div>
     <div class="nav-actions">
       <button class="btn-ghost">Iniciar sesión</button>
-      <button class="btn-cta" onclick="scrollToForm()">Registrar mi cancha</button>
+      <a href="registro.html" class="btn-cta-link"><button class="btn-cta">Registrar mi cancha</button></a>
     </div>
     <button class="hamburger" onclick="toggleMenu()" aria-label="Abrir menú" aria-expanded="false">
       <span></span><span></span><span></span>
@@ -419,7 +420,7 @@
     <a href="#como-funciona" onclick="toggleMenu()">¿Cómo funciona?</a>
     <a href="#precios" onclick="toggleMenu()">Precios</a>
     <a href="#preguntas" onclick="toggleMenu()">Preguntas</a>
-    <button class="btn-cta-mobile" onclick="scrollToForm();toggleMenu()">Registrar mi cancha →</button>
+    <a href="registro.html" class="btn-cta-mobile" onclick="toggleMenu()">Registrar mi cancha →</a>
   </div>
 </nav>
 
@@ -432,7 +433,7 @@
     <h1>Tu cancha, <em>siempre llena</em>.<br/>Sin llamadas. Sin WhatsApp.</h1>
     <p>CanchaGo es la plataforma que permite a tus clientes reservar y pagar en línea — en menos de 2 minutos, desde el celular, sin que tengas que hacer nada.</p>
     <div class="hero-ctas">
-      <button class="btn-hero" onclick="scrollToForm()">Registrar mi cancha gratis →</button>
+      <a href="registro.html"><button class="btn-hero">Registrar mi cancha gratis →</button></a>
       <button class="btn-hero-2" onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})">Ver cómo funciona</button>
     </div>
     <div class="hero-trust" role="list" aria-label="Ventajas principales">
