@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Panel — CanchaGo</title>
+  <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       TOKENS — dark-first, matches CanchaGo design system
+    ============================================================ */
+    :root {
+      --green:    #22c55e;
+      --green-d:  #16a34a;
+      --dark:     #0a0f1e;
+      --card:     #111827;
+      --card2:    #1f2937;
+      --border:   #1f2937;
+      --border2:  #374151;
+      --muted:    #9ca3af;
+      --text:     #f9fafb;
+      --red:      #ef4444;
+      --yellow:   #fbbf24;
+      --radius:   14px;
+
+      /* semantic */
+      --status-ok:   #22c55e;
+      --status-warn: #fbbf24;
+      --status-bad:  #ef4444;
+      --status-off:  #6b7280;
+
+      /* sidebar */
+      --sidebar-w: 252px;
+      --topbar-h:  0px;   /* no top bar on desktop */
+      --bottombar-h: 60px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; color-scheme: dark; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      min-height: 100dvh;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: inherit; cursor: pointer; }
+    input, select { font-family: inherit; }
+
+    /* ============================================================
+       APP SHELL — sidebar + main
+    ============================================================ */
+    .app {
+      display: flex;
+      min-height: 100dvh;
+    }
+
+    /* ============================================================
+       SIDEBAR
+    ============================================================ */
+    .sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      inset: 0 auto 0 0;
+      z-index: 200;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    .sidebar-logo {
+      padding: 1.25rem 1.25rem 1rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .sidebar-logo .logo-mark {
+      width: 32px; height: 32px;
+      background: var(--green);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: .9rem; color: #000;
+      flex-shrink: 0;
+    }
+    .sidebar-logo .logo-text {
+      font-weight: 800; font-size: 1.1rem; color: var(--green);
+      letter-spacing: -.02em;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: .75rem .75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+      padding: .62rem .85rem;
+      border-radius: 10px;
+      font-size: .875rem;
+      font-weight: 500;
+      color: var(--muted);
+      transition: background .15s, color .15s;
+      cursor: pointer;
+      border: none;
+      background: none;
+      text-align: left;
+      width: 100%;
+    }
+    .nav-link .icon {
+      width: 18px; height: 18px;
+      flex-shrink: 0;
+      opacity: .7;
+    }
+    .nav-link:hover { background: var(--card2); color: var(--text); }
+    .nav-link:hover .icon { opacity: 1; }
+    .nav-link.active {
+      background: rgba(34,197,94,.12);
+      color: var(--green);
+    }
+    .nav-link.active .icon { opacity: 1; }
+
+    .nav-section-label {
+      font-size: .7rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: .9rem .85rem .3rem;
+      opacity: .6;
+    }
+
+    .sidebar-owner {
+      padding: .85rem 1rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+    }
+    .owner-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--green-d), var(--green));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: .85rem; color: #000;
+      flex-shrink: 0;
+    }
+    .owner-info { min-width: 0; }
+    .owner-name {
+      font-size: .82rem; font-weight: 600;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .owner-cancha {
+      font-size: .72rem; color: var(--muted);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    /* Sidebar overlay (mobile) */
+    .sidebar-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.55);
+      z-index: 199;
+    }
+    .sidebar-overlay.open { display: block; }
+
+    /* ============================================================
+       MAIN CONTENT
+    ============================================================ */
+    .main {
+      flex: 1;
+      margin-left: var(--sidebar-w);
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .main-inner {
+      flex: 1;
+      padding: 1.75rem 1.75rem 3rem;
+      max-width: 1080px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* ============================================================
+       PAGE HEADER
+    ============================================================ */
+    .page-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+      flex-wrap: wrap;
+    }
+    .page-header-left h1 {
+      font-size: 1.55rem; font-weight: 800;
+      letter-spacing: -.03em; line-height: 1.2;
+    }
+    .page-header-left .subtitle {
+      display: flex; align-items: center; gap: .6rem;
+      margin-top: .35rem;
+      font-size: .85rem; color: var(--muted);
+    }
+    .badge-active {
+      display: inline-flex; align-items: center; gap: .3rem;
+      background: rgba(34,197,94,.12);
+      color: var(--green);
+      border: 1px solid rgba(34,197,94,.25);
+      border-radius: 20px;
+      padding: .18rem .65rem;
+      font-size: .72rem; font-weight: 600;
+      letter-spacing: .02em;
+    }
+    .badge-active::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .35; }
+    }
+
+    .page-header-right {
+      display: flex; align-items: center; gap: .75rem;
+    }
+    .clock {
+      font-size: .85rem; font-weight: 600;
+      color: var(--muted);
+      background: var(--card);
+      border: 1px solid var(--border2);
+      padding: .4rem .85rem;
+      border-radius: 8px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Hamburger (mobile only) */
+    .btn-menu {
+      display: none;
+      align-items: center; justify-content: center;
+      width: 38px; height: 38px;
+      background: var(--card);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      color: var(--text);
+    }
+
+    /* ============================================================
+       KPI GRID
+    ============================================================ */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .kpi-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.1rem 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: .45rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .kpi-card::after {
+      content: '';
+      position: absolute;
+      inset: 0 0 auto;
+      height: 2px;
+      border-radius: 2px 2px 0 0;
+    }
+    .kpi-card.green::after  { background: var(--green); }
+    .kpi-card.yellow::after { background: var(--yellow); }
+    .kpi-card.blue::after   { background: #60a5fa; }
+    .kpi-card.purple::after { background: #a78bfa; }
+
+    .kpi-label {
+      font-size: .72rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .07em;
+      color: var(--muted);
+    }
+    .kpi-value {
+      font-size: 1.6rem; font-weight: 800;
+      letter-spacing: -.04em; line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .kpi-card.green .kpi-value  { color: var(--green); }
+    .kpi-card.yellow .kpi-value { color: var(--yellow); }
+    .kpi-card.blue .kpi-value   { color: #60a5fa; }
+    .kpi-card.purple .kpi-value { color: #a78bfa; }
+
+    .kpi-sub {
+      font-size: .75rem; color: var(--muted);
+    }
+    .kpi-icon {
+      position: absolute; right: 1rem; top: 1rem;
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+    }
+    .kpi-card.green  .kpi-icon { background: rgba(34,197,94,.1); }
+    .kpi-card.yellow .kpi-icon { background: rgba(251,191,36,.1); }
+    .kpi-card.blue   .kpi-icon { background: rgba(96,165,250,.1); }
+    .kpi-card.purple .kpi-icon { background: rgba(167,139,250,.1); }
+
+    /* ============================================================
+       SECTION HEADER
+    ============================================================ */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      gap: 1rem;
+    }
+    .section-title {
+      font-size: 1rem; font-weight: 700;
+      letter-spacing: -.01em;
+    }
+    .section-badge {
+      font-size: .72rem; font-weight: 600;
+      background: var(--card2);
+      border: 1px solid var(--border2);
+      border-radius: 20px;
+      padding: .2rem .6rem;
+      color: var(--muted);
+    }
+
+    /* ============================================================
+       RESERVAS TABLE
+    ============================================================ */
+    .table-wrap {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 1.75rem;
+    }
+    .res-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .85rem;
+    }
+    .res-table th {
+      text-align: left;
+      padding: .75rem 1rem;
+      font-size: .7rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .07em;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,.02);
+    }
+    .res-table td {
+      padding: .78rem 1rem;
+      border-bottom: 1px solid rgba(31,41,55,.6);
+      vertical-align: middle;
+    }
+    .res-table tbody tr:last-child td { border-bottom: none; }
+    .res-table tbody tr:hover td { background: rgba(255,255,255,.018); }
+
+    .hora-cell {
+      font-weight: 700; font-size: .88rem;
+      font-variant-numeric: tabular-nums;
+      color: var(--text);
+    }
+    .hora-cell small { display: block; font-weight: 400; font-size: .72rem; color: var(--muted); }
+
+    .cliente-name { font-weight: 600; font-size: .85rem; }
+    .cliente-name.libre { color: var(--muted); font-style: italic; font-weight: 400; }
+
+    .tel-cell { color: var(--muted); font-size: .82rem; font-variant-numeric: tabular-nums; }
+
+    .status-chip {
+      display: inline-flex; align-items: center; gap: .3rem;
+      padding: .22rem .65rem;
+      border-radius: 20px;
+      font-size: .72rem; font-weight: 600;
+      white-space: nowrap;
+    }
+    .status-chip::before {
+      content: '';
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    .status-ok   { background: rgba(34,197,94,.12);  color: var(--status-ok);  border: 1px solid rgba(34,197,94,.2); }
+    .status-warn { background: rgba(251,191,36,.12); color: var(--status-warn); border: 1px solid rgba(251,191,36,.2); }
+    .status-bad  { background: rgba(239,68,68,.12);  color: var(--status-bad);  border: 1px solid rgba(239,68,68,.2); }
+    .status-off  { background: rgba(107,114,128,.12); color: var(--status-off); border: 1px solid rgba(107,114,128,.2); }
+    .status-blocked { background: rgba(167,139,250,.12); color: #a78bfa; border: 1px solid rgba(167,139,250,.2); }
+
+    .actions-cell { display: flex; gap: .45rem; align-items: center; }
+
+    .btn-sm {
+      padding: .3rem .75rem;
+      border-radius: 7px;
+      font-size: .75rem; font-weight: 600;
+      border: 1px solid var(--border2);
+      background: var(--card2);
+      color: var(--text);
+      transition: background .15s, border-color .15s, color .15s;
+    }
+    .btn-sm:hover { background: var(--border2); }
+    .btn-sm.btn-ver { border-color: rgba(96,165,250,.4); color: #60a5fa; background: rgba(96,165,250,.08); }
+    .btn-sm.btn-ver:hover { background: rgba(96,165,250,.16); }
+    .btn-sm.btn-bloquear { border-color: rgba(167,139,250,.4); color: #a78bfa; background: rgba(167,139,250,.08); }
+    .btn-sm.btn-bloquear:hover { background: rgba(167,139,250,.16); }
+    .btn-sm.btn-desbloq { border-color: rgba(239,68,68,.4); color: var(--red); background: rgba(239,68,68,.08); }
+    .btn-sm.btn-desbloq:hover { background: rgba(239,68,68,.16); }
+
+    /* Mobile: cards instead of table */
+    .res-cards { display: none; margin-bottom: 1.75rem; }
+    .res-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.1rem;
+      margin-bottom: .6rem;
+    }
+    .res-card-top {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: .55rem;
+    }
+    .res-card-hora { font-weight: 800; font-size: 1rem; }
+    .res-card-body { display: flex; flex-direction: column; gap: .28rem; margin-bottom: .65rem; }
+    .res-card-row { display: flex; gap: .4rem; font-size: .8rem; }
+    .res-card-row .lbl { color: var(--muted); min-width: 56px; }
+    .res-card-actions { display: flex; gap: .5rem; }
+
+    /* ============================================================
+       TWO-COLUMN GRID (calendar + block form)
+    ============================================================ */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-bottom: 1.75rem;
+      align-items: start;
+    }
+
+    /* ============================================================
+       MINI CALENDAR
+    ============================================================ */
+    .calendar-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+    }
+    .week-strip {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: .4rem;
+      margin-top: .75rem;
+    }
+    .day-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .35rem;
+    }
+    .day-label {
+      font-size: .68rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .04em;
+      color: var(--muted);
+    }
+    .day-label.today { color: var(--green); }
+    .day-bar-track {
+      width: 100%;
+      height: 80px;
+      background: var(--card2);
+      border-radius: 6px;
+      overflow: hidden;
+      display: flex;
+      align-items: flex-end;
+      position: relative;
+    }
+    .day-bar-fill {
+      width: 100%;
+      border-radius: 4px;
+      transition: height .4s ease;
+    }
+    .bar-high   { background: linear-gradient(to top, var(--green-d), var(--green)); }
+    .bar-mid    { background: linear-gradient(to top, #ca8a04, var(--yellow)); }
+    .bar-low    { background: linear-gradient(to top, #374151, #6b7280); }
+    .day-today-marker {
+      position: absolute; inset: 0;
+      border: 1px solid var(--green);
+      border-radius: 6px;
+      pointer-events: none;
+    }
+    .day-pct {
+      font-size: .68rem; font-weight: 700;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+    .day-pct.high { color: var(--green); }
+    .day-pct.warn { color: var(--yellow); }
+
+    /* ============================================================
+       BLOCK SCHEDULE FORM
+    ============================================================ */
+    .block-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+    }
+    .block-form-row {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      margin-top: .75rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .form-select {
+      background: var(--card2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      color: var(--text);
+      padding: .45rem .85rem;
+      font-size: .85rem;
+      cursor: pointer;
+      flex: 1; min-width: 140px;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239ca3af' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right .75rem center;
+      padding-right: 2rem;
+    }
+    .form-select:focus { outline: none; border-color: var(--green); }
+
+    .btn-save-block {
+      background: var(--green);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      padding: .45rem 1.1rem;
+      font-size: .85rem; font-weight: 700;
+      transition: background .15s;
+    }
+    .btn-save-block:hover { background: var(--green-d); }
+
+    .hours-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+      gap: .45rem;
+    }
+    .hour-chip {
+      padding: .42rem .3rem;
+      border-radius: 8px;
+      font-size: .78rem; font-weight: 600;
+      text-align: center;
+      background: var(--card2);
+      border: 1px solid var(--border2);
+      color: var(--muted);
+      cursor: pointer;
+      transition: background .15s, border-color .15s, color .15s;
+      user-select: none;
+      font-variant-numeric: tabular-nums;
+    }
+    .hour-chip:hover { border-color: var(--border2); background: var(--border); color: var(--text); }
+    .hour-chip.selected {
+      background: rgba(167,139,250,.15);
+      border-color: rgba(167,139,250,.5);
+      color: #a78bfa;
+    }
+    .hour-chip.occupied {
+      background: rgba(239,68,68,.08);
+      border-color: rgba(239,68,68,.2);
+      color: rgba(239,68,68,.5);
+      cursor: not-allowed;
+    }
+    .block-hint {
+      margin-top: .75rem;
+      font-size: .75rem; color: var(--muted);
+    }
+    .block-hint span { color: #a78bfa; font-weight: 600; }
+
+    /* ============================================================
+       BOTTOM TAB BAR (mobile)
+    ============================================================ */
+    .bottom-tabs {
+      display: none;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: calc(var(--bottombar-h) + env(safe-area-inset-bottom, 0px));
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      z-index: 200;
+      align-items: stretch;
+    }
+    .tab-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      font-size: .6rem; font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      cursor: pointer;
+      border: none; background: none;
+      padding: 0;
+    }
+    .tab-item svg { width: 20px; height: 20px; }
+    .tab-item.active { color: var(--green); }
+
+    /* ============================================================
+       MODAL
+    ============================================================ */
+    .modal-backdrop {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.65);
+      z-index: 400;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+    }
+    .modal-backdrop.open { display: flex; }
+
+    .modal {
+      background: var(--card);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 420px;
+      padding: 1.5rem;
+      position: relative;
+      animation: slideUp .2s ease;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(16px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+    .modal-close {
+      position: absolute; top: 1rem; right: 1rem;
+      width: 28px; height: 28px;
+      border-radius: 6px;
+      background: var(--card2);
+      border: 1px solid var(--border2);
+      color: var(--muted);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .9rem; cursor: pointer;
+      transition: background .15s;
+    }
+    .modal-close:hover { background: var(--border2); color: var(--text); }
+    .modal-title {
+      font-size: 1rem; font-weight: 700; margin-bottom: 1.1rem;
+      padding-right: 2rem;
+    }
+    .modal-detail-grid {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: .55rem .75rem;
+      font-size: .85rem;
+    }
+    .modal-lbl { color: var(--muted); font-weight: 500; }
+    .modal-val { font-weight: 600; }
+    .modal-actions {
+      margin-top: 1.25rem;
+      display: flex; gap: .6rem; flex-wrap: wrap;
+    }
+    .btn-modal-primary {
+      background: var(--green);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      padding: .5rem 1.1rem;
+      font-size: .85rem; font-weight: 700;
+      flex: 1;
+    }
+    .btn-modal-primary:hover { background: var(--green-d); }
+    .btn-modal-sec {
+      background: var(--card2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: .5rem 1rem;
+      font-size: .85rem; font-weight: 600;
+      color: var(--muted);
+      flex: 1;
+    }
+    .btn-modal-sec:hover { color: var(--text); background: var(--border2); }
+
+    /* ============================================================
+       TOAST
+    ============================================================ */
+    .toast-wrap {
+      position: fixed;
+      bottom: 5rem;
+      left: 50%; transform: translateX(-50%);
+      z-index: 500;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .5rem;
+    }
+    .toast {
+      background: var(--card2);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: .6rem 1.1rem;
+      font-size: .82rem; font-weight: 600;
+      color: var(--text);
+      box-shadow: 0 4px 16px rgba(0,0,0,.4);
+      opacity: 0;
+      transition: opacity .25s;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; }
+
+    /* ============================================================
+       RESPONSIVE — Mobile
+    ============================================================ */
+    @media (max-width: 860px) {
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 700px) {
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform .25s ease;
+      }
+      .sidebar.open { transform: translateX(0); }
+
+      .main { margin-left: 0; }
+      .main-inner { padding: 1rem 1rem 5rem; }
+
+      .btn-menu { display: flex; }
+
+      .table-wrap { display: none; }
+      .res-cards { display: block; }
+
+      .two-col { grid-template-columns: 1fr; }
+
+      .bottom-tabs { display: flex; }
+
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: .65rem; }
+      .kpi-value { font-size: 1.3rem; }
+
+      .page-header-left h1 { font-size: 1.2rem; }
+
+      .toast-wrap { bottom: calc(var(--bottombar-h) + .75rem + env(safe-area-inset-bottom, 0px)); }
+    }
+
+    @media (max-width: 400px) {
+      .kpi-grid { grid-template-columns: 1fr 1fr; gap: .5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===================== SIDEBAR OVERLAY ===================== -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- ===================== SIDEBAR ===================== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">C</div>
+    <span class="logo-text">CanchaGo</span>
+  </div>
+
+  <nav class="sidebar-nav" aria-label="Navegación principal">
+    <a href="index.html" class="nav-link" title="Volver al inicio">
+      <svg class="icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+      Volver al inicio
+    </a>
+
+    <div class="nav-section-label">Panel</div>
+
+    <button class="nav-link active" onclick="showSection('hoy')">
+      <svg class="icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6"/></svg>
+      Hoy
+    </button>
+    <button class="nav-link" onclick="showSection('reservas')">
+      <svg class="icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      Reservas
+    </button>
+    <button class="nav-link" onclick="showSection('calendario')">
+      <svg class="icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Calendario
+    </button>
+
+    <div class="nav-section-label">Gestión</div>
+
+    <button class="nav-link" onclick="showSection('micancha')">
+      <svg class="icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+      Mi Cancha
+    </button>
+    <button class="nav-link" onclick="showSection('ayuda')">
+      <svg class="icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Ayuda
+    </button>
+  </nav>
+
+  <div class="sidebar-owner">
+    <div class="owner-avatar">JG</div>
+    <div class="owner-info">
+      <div class="owner-name">Juan García</div>
+      <div class="owner-cancha">El Nogal · Usaquén</div>
+    </div>
+  </div>
+</aside>
+
+<!-- ===================== MAIN ===================== -->
+<main class="main">
+  <div class="main-inner">
+
+    <!-- PAGE HEADER -->
+    <header class="page-header">
+      <div class="page-header-left">
+        <h1 id="greeting">Buenos días, Juan ☀️</h1>
+        <div class="subtitle">
+          <span id="today-date">lunes, 12 de octubre de 2026</span>
+          <span class="badge-active">Cancha activa</span>
+        </div>
+      </div>
+      <div class="page-header-right">
+        <div class="clock" id="clock">--:--:--</div>
+        <button class="btn-menu" id="menuBtn" onclick="openSidebar()" aria-label="Abrir menú">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- KPI CARDS -->
+    <div class="kpi-grid">
+      <div class="kpi-card green">
+        <div class="kpi-icon">🗓️</div>
+        <div class="kpi-label">Reservas hoy</div>
+        <div class="kpi-value" id="kpi-reservas">6</div>
+        <div class="kpi-sub">de 8 turnos disponibles</div>
+      </div>
+      <div class="kpi-card yellow">
+        <div class="kpi-icon">💵</div>
+        <div class="kpi-label">Ingresos hoy</div>
+        <div class="kpi-value">$480K</div>
+        <div class="kpi-sub">COP · 4 pagos recibidos</div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-icon">📈</div>
+        <div class="kpi-label">Ocupación semana</div>
+        <div class="kpi-value">74%</div>
+        <div class="kpi-sub">+8% vs semana pasada</div>
+      </div>
+      <div class="kpi-card purple">
+        <div class="kpi-icon">⏰</div>
+        <div class="kpi-label">Próxima reserva</div>
+        <div class="kpi-value" id="kpi-proxima">45 min</div>
+        <div class="kpi-sub" id="kpi-proxima-sub">Julián Torres · 10:00</div>
+      </div>
+    </div>
+
+    <!-- RESERVAS HOY — TABLE (desktop) -->
+    <div class="section-header">
+      <div style="display:flex;align-items:center;gap:.6rem;">
+        <span class="section-title">Reservas de hoy</span>
+        <span class="section-badge" id="res-count-badge">8 turnos</span>
+      </div>
+      <button class="btn-sm" style="font-size:.78rem;" onclick="showToast('📋 Exportando horario…')">Exportar</button>
+    </div>
+
+    <!-- Desktop table -->
+    <div class="table-wrap">
+      <table class="res-table" id="reservasTable">
+        <thead>
+          <tr>
+            <th>Hora</th>
+            <th>Cliente</th>
+            <th>Teléfono</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyReservas"></tbody>
+      </table>
+    </div>
+
+    <!-- Mobile cards -->
+    <div class="res-cards" id="resCards"></div>
+
+    <!-- TWO-COL: calendar + blocker -->
+    <div class="two-col">
+
+      <!-- MINI CALENDAR -->
+      <div class="calendar-card">
+        <div class="section-header" style="margin-bottom:0">
+          <span class="section-title">Ocupación esta semana</span>
+          <span class="section-badge">Oct 7–13</span>
+        </div>
+        <div class="week-strip" id="weekStrip"></div>
+      </div>
+
+      <!-- BLOCK SCHEDULE -->
+      <div class="block-card">
+        <div class="section-title">Bloquear horario</div>
+        <div class="block-form-row">
+          <select class="form-select" id="blockDay">
+            <option value="lun">Lunes 7 oct</option>
+            <option value="mar">Martes 8 oct</option>
+            <option value="mie">Miércoles 9 oct</option>
+            <option value="jue">Jueves 10 oct</option>
+            <option value="vie" selected>Viernes 11 oct</option>
+            <option value="sab">Sábado 12 oct</option>
+            <option value="dom">Domingo 13 oct</option>
+          </select>
+          <button class="btn-save-block" onclick="saveBlocked()">Guardar</button>
+        </div>
+        <div class="hours-grid" id="hoursGrid"></div>
+        <p class="block-hint">Toca para seleccionar · <span id="selectedCount">0</span> horas seleccionadas</p>
+      </div>
+
+    </div>
+
+  </div><!-- /main-inner -->
+</main>
+
+<!-- ===================== BOTTOM TABS (mobile) ===================== -->
+<nav class="bottom-tabs" aria-label="Navegación móvil">
+  <button class="tab-item active" onclick="mobileTab(this,'hoy')">
+    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6"/></svg>
+    Hoy
+  </button>
+  <button class="tab-item" onclick="mobileTab(this,'reservas')">
+    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+    Reservas
+  </button>
+  <button class="tab-item" onclick="mobileTab(this,'calendario')">
+    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    Calendario
+  </button>
+  <button class="tab-item" onclick="mobileTab(this,'micancha')">
+    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+    Cancha
+  </button>
+  <button class="tab-item" onclick="openSidebar()">
+    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    Más
+  </button>
+</nav>
+
+<!-- ===================== MODAL DETALLE ===================== -->
+<div class="modal-backdrop" id="modalBackdrop" onclick="closeModalIfBackdrop(event)">
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <button class="modal-close" onclick="closeModal()" aria-label="Cerrar">✕</button>
+    <div class="modal-title" id="modalTitle">Detalle de reserva</div>
+    <div class="modal-detail-grid" id="modalGrid"></div>
+    <div class="modal-actions" id="modalActions"></div>
+  </div>
+</div>
+
+<!-- ===================== TOAST ===================== -->
+<div class="toast-wrap">
+  <div class="toast" id="toastEl"></div>
+</div>
+
+<!-- ===================== SCRIPTS ===================== -->
+<script>
+/* ============================================================
+   DATA
+============================================================ */
+const RESERVAS = [
+  { id:1, hora:'06:00', dur:'1h', cliente:'Carlos Rodríguez',   tel:'311 452-1876', estado:'confirmada',     deporte:'Fútbol 5', pagado:'$80.000', nota:'' },
+  { id:2, hora:'07:00', dur:'1h', cliente:'Andrés Mejía',       tel:'300 873-4521', estado:'confirmada',     deporte:'Fútbol 5', pagado:'$80.000', nota:'' },
+  { id:3, hora:'08:00', dur:'1h', cliente:null,                 tel:'',             estado:'libre',          deporte:'—',        pagado:'—',       nota:'' },
+  { id:4, hora:'09:00', dur:'1h', cliente:'Laura Vargas',       tel:'315 298-7643', estado:'pendiente pago', deporte:'Fútbol 5', pagado:'Pendiente', nota:'Prometió pagar antes de las 8am' },
+  { id:5, hora:'10:00', dur:'1h', cliente:'Julián Torres',      tel:'318 654-3210', estado:'confirmada',     deporte:'Fútbol 5', pagado:'$80.000', nota:'Grupo de 10 personas' },
+  { id:6, hora:'11:00', dur:'1h', cliente:null,                 tel:'',             estado:'libre',          deporte:'—',        pagado:'—',       nota:'' },
+  { id:7, hora:'12:00', dur:'1h', cliente:'Miguel Ángel Ruiz',  tel:'301 765-4321', estado:'cancelada',      deporte:'Fútbol 5', pagado:'Reembolsado', nota:'Canceló por lluvia' },
+  { id:8, hora:'13:00', dur:'1h', cliente:'Sebastián Moreno',   tel:'320 123-4567', estado:'pendiente pago', deporte:'Fútbol 5', pagado:'Pendiente', nota:'' },
+];
+
+const WEEK_DATA = [
+  { day:'Lun', pct:85, today:false },
+  { day:'Mar', pct:60, today:false },
+  { day:'Mié', pct:45, today:false },
+  { day:'Jue', pct:90, today:false },
+  { day:'Vie', pct:75, today:false },
+  { day:'Sáb', pct:95, today:true },
+  { day:'Dom', pct:50, today:false },
+];
+
+const ALL_HOURS = ['06:00','07:00','08:00','09:00','10:00','11:00','12:00',
+                   '13:00','14:00','15:00','16:00','17:00','18:00','19:00',
+                   '20:00','21:00','22:00'];
+
+const OCCUPIED_HOURS = new Set(['06:00','07:00','09:00','10:00','12:00','13:00']);
+
+let blockedHours = new Set();
+let toastTimer = null;
+
+/* ============================================================
+   STATUS HELPERS
+============================================================ */
+function statusClass(estado) {
+  if (estado === 'confirmada')     return 'status-ok';
+  if (estado === 'pendiente pago') return 'status-warn';
+  if (estado === 'cancelada')      return 'status-bad';
+  if (estado === 'bloqueado')      return 'status-blocked';
+  return 'status-off';
+}
+function statusLabel(estado) {
+  if (estado === 'pendiente pago') return 'Pendiente pago';
+  return estado.charAt(0).toUpperCase() + estado.slice(1);
+}
+
+/* ============================================================
+   RENDER TABLE
+============================================================ */
+function renderTable() {
+  const tbody = document.getElementById('tbodyReservas');
+  tbody.innerHTML = '';
+
+  RESERVAS.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.id = 'row-' + r.id;
+
+    const actionHtml = buildActionHtml(r, 'table');
+
+    tr.innerHTML = `
+      <td>
+        <div class="hora-cell">${r.hora}<small>${r.dur}</small></div>
+      </td>
+      <td>
+        <div class="cliente-name${!r.cliente ? ' libre' : ''}">${r.cliente || 'Turno libre'}</div>
+      </td>
+      <td>
+        <div class="tel-cell">${r.tel || '—'}</div>
+      </td>
+      <td>
+        <span class="status-chip ${statusClass(r.estado)}">${statusLabel(r.estado)}</span>
+      </td>
+      <td>
+        <div class="actions-cell" id="action-t-${r.id}">${actionHtml}</div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function buildActionHtml(r, ctx) {
+  const pfx = ctx === 'table' ? 'action-t-' : 'action-c-';
+  if (r.estado === 'bloqueado') {
+    return `<button class="btn-sm btn-desbloq" onclick="desbloquear(${r.id})">Desbloquear</button>`;
+  }
+  if (r.estado === 'libre') {
+    return `<button class="btn-sm btn-bloquear" onclick="bloquearTurno(${r.id})">Bloquear</button>`;
+  }
+  return `<button class="btn-sm btn-ver" onclick="verReserva(${r.id})">Ver</button>`;
+}
+
+/* ============================================================
+   RENDER MOBILE CARDS
+============================================================ */
+function renderCards() {
+  const container = document.getElementById('resCards');
+  container.innerHTML = '';
+  RESERVAS.forEach(r => {
+    const div = document.createElement('div');
+    div.className = 'res-card';
+    div.id = 'card-' + r.id;
+    div.innerHTML = `
+      <div class="res-card-top">
+        <span class="res-card-hora">${r.hora}</span>
+        <span class="status-chip ${statusClass(r.estado)}">${statusLabel(r.estado)}</span>
+      </div>
+      <div class="res-card-body">
+        <div class="res-card-row">
+          <span class="lbl">Cliente</span>
+          <span style="font-weight:600">${r.cliente || '<em style="color:var(--muted);font-style:italic">Turno libre</em>'}</span>
+        </div>
+        ${r.tel ? `<div class="res-card-row"><span class="lbl">Teléfono</span><span>${r.tel}</span></div>` : ''}
+      </div>
+      <div class="res-card-actions" id="action-c-${r.id}">${buildActionHtml(r, 'card')}</div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+/* ============================================================
+   ACTIONS
+============================================================ */
+function bloquearTurno(id) {
+  const r = RESERVAS.find(x => x.id === id);
+  if (!r) return;
+  r.estado = 'bloqueado';
+  refreshRow(id);
+  showToast('🚫 Turno ' + r.hora + ' bloqueado');
+  updateKpis();
+}
+
+function desbloquear(id) {
+  const r = RESERVAS.find(x => x.id === id);
+  if (!r) return;
+  r.estado = 'libre';
+  refreshRow(id);
+  showToast('✅ Turno ' + r.hora + ' disponible');
+  updateKpis();
+}
+
+function refreshRow(id) {
+  const r = RESERVAS.find(x => x.id === id);
+  const aT = document.getElementById('action-t-' + id);
+  const aC = document.getElementById('action-c-' + id);
+
+  if (aT) aT.innerHTML = buildActionHtml(r, 'table');
+  if (aC) aC.innerHTML = buildActionHtml(r, 'card');
+
+  // update status chip in table
+  const row = document.getElementById('row-' + id);
+  if (row) {
+    const chip = row.querySelector('.status-chip');
+    if (chip) { chip.className = 'status-chip ' + statusClass(r.estado); chip.textContent = statusLabel(r.estado); }
+  }
+  // update status chip in card
+  const card = document.getElementById('card-' + id);
+  if (card) {
+    const chip = card.querySelector('.status-chip');
+    if (chip) { chip.className = 'status-chip ' + statusClass(r.estado); chip.textContent = statusLabel(r.estado); }
+  }
+}
+
+function verReserva(id) {
+  const r = RESERVAS.find(x => x.id === id);
+  if (!r || !r.cliente) return;
+  openModal(r);
+}
+
+/* ============================================================
+   MODAL
+============================================================ */
+function openModal(r) {
+  document.getElementById('modalTitle').textContent = r.hora + ' — ' + r.cliente;
+  const grid = document.getElementById('modalGrid');
+  const rows = [
+    ['Cliente',   r.cliente],
+    ['Teléfono',  r.tel || '—'],
+    ['Hora',      r.hora + ' · ' + r.dur],
+    ['Deporte',   r.deporte],
+    ['Estado',    `<span class="status-chip ${statusClass(r.estado)}">${statusLabel(r.estado)}</span>`],
+    ['Pago',      r.pagado],
+  ];
+  if (r.nota) rows.push(['Nota', r.nota]);
+
+  grid.innerHTML = rows.map(([l,v]) =>
+    `<span class="modal-lbl">${l}</span><span class="modal-val">${v}</span>`
+  ).join('');
+
+  const actions = document.getElementById('modalActions');
+  actions.innerHTML = `
+    <button class="btn-modal-primary" onclick="showToast('📱 Abriendo WhatsApp…');closeModal()">WhatsApp</button>
+    <button class="btn-modal-sec" onclick="closeModal()">Cerrar</button>
+  `;
+
+  document.getElementById('modalBackdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modalBackdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function closeModalIfBackdrop(e) {
+  if (e.target === document.getElementById('modalBackdrop')) closeModal();
+}
+
+/* ============================================================
+   WEEKLY CALENDAR
+============================================================ */
+function renderWeek() {
+  const strip = document.getElementById('weekStrip');
+  strip.innerHTML = '';
+  WEEK_DATA.forEach(d => {
+    const barClass = d.pct >= 80 ? 'bar-high' : d.pct >= 50 ? 'bar-mid' : 'bar-low';
+    const pctClass = d.pct >= 80 ? 'high' : d.pct >= 50 ? 'warn' : '';
+    strip.innerHTML += `
+      <div class="day-col">
+        <span class="day-label${d.today ? ' today' : ''}">${d.day}</span>
+        <div class="day-bar-track">
+          <div class="day-bar-fill ${barClass}" style="height:${d.pct}%"></div>
+          ${d.today ? '<div class="day-today-marker"></div>' : ''}
+        </div>
+        <span class="day-pct ${pctClass}">${d.pct}%</span>
+      </div>
+    `;
+  });
+}
+
+/* ============================================================
+   HOURS GRID
+============================================================ */
+function renderHoursGrid() {
+  const grid = document.getElementById('hoursGrid');
+  grid.innerHTML = '';
+  ALL_HOURS.forEach(h => {
+    const chip = document.createElement('div');
+    chip.className = 'hour-chip' + (OCCUPIED_HOURS.has(h) ? ' occupied' : '');
+    chip.textContent = h;
+    chip.dataset.hour = h;
+    if (!OCCUPIED_HOURS.has(h)) {
+      chip.onclick = () => toggleHour(chip, h);
+    }
+    grid.appendChild(chip);
+  });
+}
+
+function toggleHour(chip, h) {
+  if (blockedHours.has(h)) {
+    blockedHours.delete(h);
+    chip.classList.remove('selected');
+  } else {
+    blockedHours.add(h);
+    chip.classList.add('selected');
+  }
+  document.getElementById('selectedCount').textContent = blockedHours.size;
+}
+
+function saveBlocked() {
+  if (blockedHours.size === 0) { showToast('Selecciona al menos una hora'); return; }
+  const day = document.getElementById('blockDay');
+  const dayLabel = day.options[day.selectedIndex].text;
+  showToast(`🚫 ${blockedHours.size} hora${blockedHours.size > 1 ? 's' : ''} bloqueada${blockedHours.size > 1 ? 's' : ''} — ${dayLabel}`);
+  blockedHours.clear();
+  document.querySelectorAll('.hour-chip.selected').forEach(c => c.classList.remove('selected'));
+  document.getElementById('selectedCount').textContent = 0;
+}
+
+/* ============================================================
+   CLOCK & DATE
+============================================================ */
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  const s = String(now.getSeconds()).padStart(2,'0');
+  document.getElementById('clock').textContent = `${h}:${m}:${s}`;
+
+  // greeting
+  const hr = now.getHours();
+  let saludo = hr < 12 ? 'Buenos días' : hr < 18 ? 'Buenas tardes' : 'Buenas noches';
+  const emoji = hr < 12 ? '☀️' : hr < 18 ? '🌤️' : '🌙';
+  document.getElementById('greeting').textContent = `${saludo}, Juan ${emoji}`;
+}
+
+function setDate() {
+  const now = new Date();
+  const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
+  document.getElementById('today-date').textContent =
+    now.toLocaleDateString('es-CO', opts);
+}
+
+/* ============================================================
+   KPI UPDATES
+============================================================ */
+function updateKpis() {
+  const activas = RESERVAS.filter(r => r.estado === 'confirmada' || r.estado === 'pendiente pago').length;
+  document.getElementById('kpi-reservas').textContent = activas;
+}
+
+/* ============================================================
+   TOAST
+============================================================ */
+function showToast(msg) {
+  const el = document.getElementById('toastEl');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+/* ============================================================
+   SIDEBAR
+============================================================ */
+function openSidebar() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebarOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function showSection(name) {
+  document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+  const match = [...document.querySelectorAll('.nav-link')].find(el => el.getAttribute('onclick') === `showSection('${name}')`);
+  if (match) match.classList.add('active');
+  if (window.innerWidth <= 700) closeSidebar();
+  showToast('Sección: ' + name.charAt(0).toUpperCase() + name.slice(1));
+}
+
+function mobileTab(el, section) {
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  if (section !== 'mas') showToast('Sección: ' + section.charAt(0).toUpperCase() + section.slice(1));
+}
+
+/* ============================================================
+   KEYBOARD
+============================================================ */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModal(); closeSidebar(); }
+});
+
+/* ============================================================
+   INIT
+============================================================ */
+(function init() {
+  setDate();
+  updateClock();
+  setInterval(updateClock, 1000);
+  renderTable();
+  renderCards();
+  renderWeek();
+  renderHoursGrid();
+})();
+</script>
+</body>
+</html>
