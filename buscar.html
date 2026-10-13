@@ -246,6 +246,7 @@
   <button class="fp" onclick="setPill(this,'Básquet')" role="listitem">🏀 Básquet</button>
   <button class="fp" onclick="setPill(this,'💡 Con luz')" role="listitem">💡 Con luz</button>
   <button class="fp" onclick="setPill(this,'🅿️ Parqueadero')" role="listitem">🅿️ Parqueadero</button>
+  <button class="fp" onclick="setPill(this,'🏠 Cubierta')" role="listitem">🏠 Cubierta</button>
 </div>
 
 <!-- RESULTS BAR + VIEW TOGGLE -->
@@ -284,18 +285,18 @@
 <script>
   /* ===== DATA ===== */
   const COURTS = [
-    { id:1, name:'Cancha Central El Nogal', sport:'Fútbol 5', localidad:'Usaquén',     icon:'⚽', price:80000, rating:4.8, reviews:62, avail:'disponible', luz:true,  parking:true,  tags:['Césped sint.','Vestieres'] },
-    { id:2, name:'Pádel Club Chicó',        sport:'Pádel',    localidad:'Chapinero',   icon:'🎾', price:65000, rating:4.9, reviews:38, avail:'pocas',      luz:true,  parking:false, tags:['Cristal','Aire acond.'] },
-    { id:3, name:'Fútbol 7 La Floresta',    sport:'Fútbol 7', localidad:'Engativá',    icon:'⚽', price:120000,rating:4.6, reviews:27, avail:'disponible', luz:true,  parking:true,  tags:['Grama nat.','Tribuna'] },
-    { id:4, name:'Club Tenis Country',      sport:'Tenis',    localidad:'Usaquén',     icon:'🎾', price:55000, rating:4.7, reviews:91, avail:'disponible', luz:false, parking:true,  tags:['Arcilla','Instructores'] },
-    { id:5, name:'Básquet Parque Simón',    sport:'Básquet',  localidad:'Teusaquillo', icon:'🏀', price:35000, rating:4.4, reviews:19, avail:'disponible', luz:true,  parking:false, tags:['Parquet','Al aire libre'] },
-    { id:6, name:'Pádel Norte Suba',        sport:'Pádel',    localidad:'Suba',        icon:'🎾', price:58000, rating:4.5, reviews:44, avail:'llena',      luz:true,  parking:true,  tags:['Cristal','Cafetería'] },
-    { id:7, name:'Fútbol 5 Kennedy Park',   sport:'Fútbol 5', localidad:'Kennedy',     icon:'⚽', price:60000, rating:4.3, reviews:33, avail:'disponible', luz:false, parking:false, tags:['Césped sint.'] },
-    { id:8, name:'Cancha Fontibón FC',      sport:'Fútbol 7', localidad:'Fontibón',    icon:'⚽', price:110000,rating:4.6, reviews:21, avail:'pocas',      luz:true,  parking:true,  tags:['Grama sint.','Camerinos'] },
-    { id:9, name:'Voleibol Barrios Unidos', sport:'Voleibol', localidad:'Barrios Unidos',icon:'🏐',price:30000,rating:4.2, reviews:12, avail:'disponible', luz:false, parking:false, tags:['Arena','2 canchas'] },
-    { id:10,name:'Tenis Club Chapinero',    sport:'Tenis',    localidad:'Chapinero',   icon:'🎾', price:50000, rating:4.8, reviews:55, avail:'disponible', luz:true,  parking:false, tags:['Dura','4 canchas'] },
-    { id:11,name:'Fútbol 5 Bosa Arena',     sport:'Fútbol 5', localidad:'Bosa',        icon:'⚽', price:55000, rating:4.1, reviews:8,  avail:'disponible', luz:true,  parking:true,  tags:['Césped sint.'] },
-    { id:12,name:'Básquet Ciudad Bolívar',  sport:'Básquet',  localidad:'Ciudad Bolívar',icon:'🏀',price:25000,rating:4.0, reviews:6,  avail:'disponible', luz:false, parking:false, tags:['Concreto'] },
+    { id:1, name:'Cancha Central El Nogal', sport:'Fútbol 5', localidad:'Usaquén',     icon:'⚽', price:80000, rating:4.8, reviews:62, avail:'disponible', luz:true,  parking:true,  cubierta:false, tags:['Césped sint.','Vestieres'] },
+    { id:2, name:'Pádel Club Chicó',        sport:'Pádel',    localidad:'Chapinero',   icon:'🎾', price:65000, rating:4.9, reviews:38, avail:'pocas',      luz:true,  parking:false, cubierta:true,  tags:['Cristal','Aire acond.'] },
+    { id:3, name:'Fútbol 7 La Floresta',    sport:'Fútbol 7', localidad:'Engativá',    icon:'⚽', price:120000,rating:4.6, reviews:27, avail:'disponible', luz:true,  parking:true,  cubierta:false, tags:['Grama nat.','Tribuna'] },
+    { id:4, name:'Club Tenis Country',      sport:'Tenis',    localidad:'Usaquén',     icon:'🎾', price:55000, rating:4.7, reviews:91, avail:'disponible', luz:false, parking:true,  cubierta:false, tags:['Arcilla','Instructores'] },
+    { id:5, name:'Básquet Parque Simón',    sport:'Básquet',  localidad:'Teusaquillo', icon:'🏀', price:35000, rating:4.4, reviews:19, avail:'disponible', luz:true,  parking:false, cubierta:false, tags:['Parquet','Al aire libre'] },
+    { id:6, name:'Pádel Norte Suba',        sport:'Pádel',    localidad:'Suba',        icon:'🎾', price:58000, rating:4.5, reviews:44, avail:'llena',      luz:true,  parking:true,  cubierta:true,  tags:['Cristal','Cafetería'] },
+    { id:7, name:'Fútbol 5 Kennedy Park',   sport:'Fútbol 5', localidad:'Kennedy',     icon:'⚽', price:60000, rating:4.3, reviews:33, avail:'disponible', luz:false, parking:false, cubierta:false, tags:['Césped sint.'] },
+    { id:8, name:'Cancha Fontibón FC',      sport:'Fútbol 7', localidad:'Fontibón',    icon:'⚽', price:110000,rating:4.6, reviews:21, avail:'pocas',      luz:true,  parking:true,  cubierta:true,  tags:['Grama sint.','Camerinos'] },
+    { id:9, name:'Voleibol Barrios Unidos', sport:'Voleibol', localidad:'Barrios Unidos',icon:'🏐',price:30000,rating:4.2, reviews:12, avail:'disponible', luz:false, parking:false, cubierta:false, tags:['Arena','2 canchas'] },
+    { id:10,name:'Tenis Club Chapinero',    sport:'Tenis',    localidad:'Chapinero',   icon:'🎾', price:50000, rating:4.8, reviews:55, avail:'disponible', luz:true,  parking:false, cubierta:true,  tags:['Dura','4 canchas'] },
+    { id:11,name:'Fútbol 5 Bosa Arena',     sport:'Fútbol 5', localidad:'Bosa',        icon:'⚽', price:55000, rating:4.1, reviews:8,  avail:'disponible', luz:true,  parking:true,  cubierta:false, tags:['Césped sint.'] },
+    { id:12,name:'Básquet Ciudad Bolívar',  sport:'Básquet',  localidad:'Ciudad Bolívar',icon:'🏀',price:25000,rating:4.0, reviews:6,  avail:'disponible', luz:false, parking:false, cubierta:false, tags:['Concreto'] },
   ];
 
   let activeSport = '';
@@ -320,6 +321,7 @@
     const extras = [];
     if (c.luz) extras.push('💡 Luz');
     if (c.parking) extras.push('🅿️ Parking');
+    if (c.cubierta) extras.push('🏠 Cubierta');
     return `
       <div class="court-card" onclick="window.location.href='cancha.html'" role="article" aria-label="${c.name}">
         <div class="card-img">
@@ -354,6 +356,7 @@
       if (sport && sport !== '💡 Con luz' && sport !== '🅿️ Parqueadero' && c.sport !== sport) return false;
       if (sport === '💡 Con luz' && !c.luz) return false;
       if (sport === '🅿️ Parqueadero' && !c.parking) return false;
+      if (sport === '🏠 Cubierta' && !c.cubierta) return false;
       if (localidad && c.localidad !== localidad) return false;
       return true;
     });
