@@ -47,13 +47,41 @@ Plataforma de reservas de canchas deportivas para Bogotá, Colombia.
 - [x] Código de reserva CGO-XXXXX
 - [x] Web Share API en cancha.html
 
+## Supabase (conectado oct 2026)
+- **Proyecto**: CanchaGo Project · `https://xqklrfzhpywbyxhskvtq.supabase.co`
+- **Publishable key**: `sb_publishable_nwWnl9ohsydrFtzmGjJz4A_dGodbr8D`
+- **Región**: East US (North Virginia) — free tier
+- **Email confirmation**: DESACTIVADO (para facilitar registro en MVP)
+- **Cliente JS**: `supabase.js` (UMD via jsdelivr cdn, cargado en registro.html)
+- **Schema**: `supabase/schema.sql` — ejecutado con éxito en SQL Editor
+
+### Tablas creadas y con RLS activo
+| Tabla | Estado |
+|---|---|
+| `perfiles` | ✅ Trigger automático al crear usuario en auth |
+| `canchas` | ✅ INSERT funciona — dueño_id vinculado a auth.uid() |
+| `disponibilidad` | ✅ Creada |
+| `reservas` | ✅ Creada — campo código CGO-XXXXX |
+| `reseñas` | ✅ Creada |
+| `lista_espera` | ✅ Creada |
+
+### Integración actual
+- `registro.html` → `supabase.auth.signUp()` + insert en `canchas` ✅ funcionando en prod
+- `buscar.html` → sigue con data hardcodeada (12 canchas de prueba) — intencional
+- `cancha.html`, `panel.html`, `lista-espera.html` → pendiente conectar a Supabase
+
+### Lección aprendida — RLS PostgreSQL
+- Políticas `FOR INSERT` requieren `WITH CHECK (...)` NO `USING (...)`
+- `FOR UPDATE` y `FOR DELETE` usan `USING (...)`
+- `FOR ALL` necesita ambos: `USING` + `WITH CHECK`
+
 ## Roadmap pendiente (en orden)
-1. **Fase 1** — Backend real con Supabase (PostgreSQL + Auth + RLS)
-   - Tablas: usuarios, canchas, disponibilidad, reservas, reseñas
-   - Auth: email/password + JWT
-   - Emails con Resend (3K/mes gratis)
+1. **Fase 1 ✅ PARCIAL** — Supabase conectado, registro funcionando
+   - Pendiente: conectar panel.html a reservas reales
+   - Pendiente: guardar lista-espera en tabla lista_espera de Supabase
+   - Pendiente: emails con Resend al confirmar reserva
 2. **Fase 2** — Wompi (pasarela pagos Colombia): PSE, Nequi, tarjeta
-   - Webhook firmado HMAC-SHA256 → Edge Function → actualiza reserva
+   - Webhook firmado HMAC-SHA256 → Edge Function → actualiza tabla reservas
 3. **Fase 3** — Seguridad: headers CSP, rate limiting, Ley 1581
 4. **Fase 4** — Lanzamiento: 30 canchas de lista de espera, PWA, GSC
 
