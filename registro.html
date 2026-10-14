@@ -499,7 +499,14 @@
   </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
+  // Supabase client
+  const sb = supabase.createClient(
+    'https://xqklrfzhpywbyxhskvtq.supabase.co',
+    'sb_publishable_nwWnl9ohsydrFtzmGjJz4A_dGodbr8D'
+  );
+
   let currentStep = 1;
   const selectedSports = new Set();
   let openTime = '08:00';
@@ -604,13 +611,76 @@
   }
 
   /* ===== SUBMIT ===== */
-  function submitForm() {
-    const slug = document.getElementById('inp-slug').value || 'tucancha';
-    document.getElementById('successSlug').textContent = slug;
-    document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
-    document.querySelector('.stepper').style.display = 'none';
-    document.getElementById('successPanel').classList.add('show');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  async function submitForm() {
+    const btn = document.querySelector('#panel3 .btn-next');
+    btn.disabled = true;
+    btn.textContent = 'Registrando...';
+
+    const nombre    = document.getElementById('inp-nombre').value.trim()
+                    + ' ' + document.getElementById('inp-apellido').value.trim();
+    const email     = document.getElementById('inp-email').value.trim();
+    const telefono  = document.getElementById('inp-cel').value.trim();
+    const password  = document.getElementById('inp-pass').value;
+    const nomcancha = document.getElementById('inp-nomcancha').value.trim();
+    const slug      = document.getElementById('inp-slug').value.trim() || 'tucancha';
+    const direccion = document.getElementById('inp-dir').value.trim();
+    const localidad = document.getElementById('inp-localidad').value;
+    const precio    = +document.getElementById('inp-precio').value;
+    const desc      = document.getElementById('inp-desc').value.trim();
+    const luz       = document.getElementById('inp-luz').value === 'si';
+    const cubierta  = document.getElementById('inp-cubierta').value !== 'no';
+    const parquead  = document.getElementById('inp-parqueadero').value;
+    const duracion  = +document.getElementById('inp-duracion').value;
+    const deportes  = [...selectedSports];
+    const dias      = [...document.querySelectorAll('#daysGrid .time-chip.selected')].map(c => c.dataset.val);
+
+    try {
+      // 1. Crear cuenta en Supabase Auth
+      const { data: authData, error: authError } = await sb.auth.signUp({
+        email,
+        password,
+        options: { data: { nombre, telefono, rol: 'dueño' } }
+      });
+
+      if (authError) throw new Error(
+        authError.message.includes('already registered')
+          ? 'Este email ya está registrado. ¿Ya tienes cuenta?'
+          : authError.message
+      );
+
+      // 2. Insertar cancha (requiere email confirmado si RLS está activo)
+      const { error: canchaError } = await sb.from('canchas').insert({
+        dueño_id:      authData.user.id,
+        nombre:        nomcancha,
+        slug,
+        descripcion:   desc,
+        localidad,
+        direccion,
+        deportes,
+        precio_hora:   precio,
+        hora_apertura: openTime,
+        hora_cierre:   closeTime,
+        duracion_min:  duracion,
+        dias_activos:  dias,
+        luz,
+        cubierta,
+        parqueadero:   parquead,
+      });
+
+      if (canchaError) console.warn('Cancha no guardada aún:', canchaError.message);
+
+      // 3. Mostrar éxito
+      document.getElementById('successSlug').textContent = slug;
+      document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+      document.querySelector('.stepper').style.display = 'none';
+      document.getElementById('successPanel').classList.add('show');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Registrar cancha 🎉';
+      alert('⚠️ ' + err.message);
+    }
   }
 
   /* ===== COPY LINK ===== */
