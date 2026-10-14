@@ -19,14 +19,14 @@ create table public.perfiles (
 
 alter table public.perfiles enable row level security;
 
--- Cada usuario solo ve y edita su propio perfil
 create policy "perfil: ver propio"
   on public.perfiles for select
   using (auth.uid() = id);
 
 create policy "perfil: editar propio"
   on public.perfiles for update
-  using (auth.uid() = id);
+  using (auth.uid() = id)
+  with check (auth.uid() = id);
 
 -- Trigger: crea perfil automáticamente al registrar usuario
 create or replace function public.handle_new_user()
@@ -61,7 +61,7 @@ create table public.canchas (
   lat           numeric(10,7),
   lng           numeric(10,7),
   deportes      text[] default '{}',
-  precio_hora   integer not null,       -- en COP
+  precio_hora   integer not null,
   hora_apertura text default '08:00',
   hora_cierre   text default '22:00',
   duracion_min  integer default 60,
@@ -80,36 +80,44 @@ create policy "canchas: ver activas"
   on public.canchas for select
   using (activa = true);
 
--- Solo el dueño puede insertar/editar/eliminar sus canchas
-create policy "canchas: dueño gestiona"
-  on public.canchas for all
+-- Solo el dueño puede insertar sus canchas
+create policy "canchas: dueño inserta"
+  on public.canchas for insert
+  with check (auth.uid() = dueño_id);
+
+-- Solo el dueño puede actualizar o eliminar sus canchas
+create policy "canchas: dueño edita"
+  on public.canchas for update
+  using (auth.uid() = dueño_id)
+  with check (auth.uid() = dueño_id);
+
+create policy "canchas: dueño elimina"
+  on public.canchas for delete
   using (auth.uid() = dueño_id);
 
 -- ============================================================
--- 3. DISPONIBILIDAD (franjas bloqueadas por fecha)
+-- 3. DISPONIBILIDAD
 -- ============================================================
 create table public.disponibilidad (
   id          uuid default uuid_generate_v4() primary key,
   cancha_id   uuid references public.canchas(id) on delete cascade not null,
   fecha       date not null,
-  hora        text not null,             -- '14:00'
+  hora        text not null,
   estado      text not null check (estado in ('bloqueado','reservado')) default 'bloqueado',
-  reserva_id  uuid,                      -- FK agregada después de crear reservas
+  reserva_id  uuid,
   creado_en   timestamptz default now(),
-  unique (cancha_id, fecha, hora)        -- evita doble reserva
+  unique (cancha_id, fecha, hora)
 );
 
 alter table public.disponibilidad enable row level security;
 
--- Cualquiera puede ver disponibilidad
 create policy "disponibilidad: ver"
   on public.disponibilidad for select
   using (true);
 
--- Solo dueño bloquea franjas manualmente
 create policy "disponibilidad: dueño bloquea"
   on public.disponibilidad for insert
-  using (
+  with check (
     auth.uid() = (select dueño_id from public.canchas where id = cancha_id)
   );
 
@@ -123,46 +131,46 @@ create policy "disponibilidad: dueño desbloquea"
 -- 4. RESERVAS
 -- ============================================================
 create table public.reservas (
-  id              uuid default uuid_generate_v4() primary key,
-  codigo          text not null unique,            -- CGO-XXXXX
-  cancha_id       uuid references public.canchas(id) on delete restrict not null,
-  cliente_id      uuid references public.perfiles(id) on delete set null,
-  cliente_nombre  text not null,
+  id               uuid default uuid_generate_v4() primary key,
+  codigo           text not null unique,
+  cancha_id        uuid references public.canchas(id) on delete restrict not null,
+  cliente_id       uuid references public.perfiles(id) on delete set null,
+  cliente_nombre   text not null,
   cliente_telefono text,
-  cliente_email   text,
-  fecha           date not null,
-  hora            text not null,
-  duracion_min    integer not null default 60,
-  monto           integer not null,               -- en COP
-  metodo_pago     text check (metodo_pago in ('pse','nequi','tarjeta')),
-  estado          text not null check (estado in ('pendiente','confirmada','cancelada')) default 'pendiente',
-  pago_id         text,                           -- ID de Wompi
-  creado_en       timestamptz default now()
+  cliente_email    text,
+  fecha            date not null,
+  hora             text not null,
+  duracion_min     integer not null default 60,
+  monto            integer not null,
+  metodo_pago      text check (metodo_pago in ('pse','nequi','tarjeta')),
+  estado           text not null check (estado in ('pendiente','confirmada','cancelada')) default 'pendiente',
+  pago_id          text,
+  creado_en        timestamptz default now()
 );
 
 alter table public.reservas enable row level security;
 
--- Cliente ve sus propias reservas
 create policy "reservas: cliente ve las suyas"
   on public.reservas for select
   using (auth.uid() = cliente_id);
 
--- Dueño ve reservas de sus canchas
 create policy "reservas: dueño ve las de su cancha"
   on public.reservas for select
   using (
     auth.uid() = (select dueño_id from public.canchas where id = cancha_id)
   );
 
--- Cualquiera puede crear una reserva (cliente sin cuenta también)
+-- Cualquiera puede crear una reserva (clientes sin cuenta también)
 create policy "reservas: insertar"
   on public.reservas for insert
   with check (true);
 
--- Solo dueño puede cancelar
 create policy "reservas: dueño cancela"
   on public.reservas for update
   using (
+    auth.uid() = (select dueño_id from public.canchas where id = cancha_id)
+  )
+  with check (
     auth.uid() = (select dueño_id from public.canchas where id = cancha_id)
   );
 
@@ -181,7 +189,7 @@ create table public.reseñas (
   reserva_id   uuid references public.reservas(id) on delete set null,
   calificacion integer not null check (calificacion between 1 and 5),
   comentario   text,
-  verificada   boolean default false,   -- true solo si tiene reserva confirmada
+  verificada   boolean default false,
   creado_en    timestamptz default now()
 );
 
@@ -199,21 +207,20 @@ create policy "reseñas: cliente crea"
 -- 6. LISTA DE ESPERA
 -- ============================================================
 create table public.lista_espera (
-  id              uuid default uuid_generate_v4() primary key,
-  nombre          text not null,
-  whatsapp        text not null,
-  nombre_cancha   text,
-  localidad       text,
-  deportes        text[],
-  num_canchas     integer default 1,
-  sistema_actual  text,
-  posicion        serial,
-  creado_en       timestamptz default now()
+  id             uuid default uuid_generate_v4() primary key,
+  nombre         text not null,
+  whatsapp       text not null,
+  nombre_cancha  text,
+  localidad      text,
+  deportes       text[],
+  num_canchas    integer default 1,
+  sistema_actual text,
+  posicion       serial,
+  creado_en      timestamptz default now()
 );
 
 alter table public.lista_espera enable row level security;
 
--- Solo inserción pública (sin autenticación)
 create policy "lista_espera: insertar"
   on public.lista_espera for insert
   with check (true);
