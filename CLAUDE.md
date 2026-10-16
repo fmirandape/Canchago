@@ -23,10 +23,11 @@ Plataforma de reservas de canchas deportivas para Bogotá, Colombia.
 |---|---|
 | `index.html` | Landing page SEO (Bogotá, Schema.org, FAQ, pricing COP) |
 | `registro.html` | Wizard 3 pasos para dueños de cancha |
-| `cancha.html` | Página pública de cancha (reserva + pagos) |
+| `login.html` | Login de dueños → Supabase Auth → redirige a panel.html |
+| `cancha.html` | Página pública de cancha — carga por ?slug=, reserva real a Supabase |
 | `buscar.html` | Búsqueda con filtros: deporte, localidad, luz, parqueadero, cubierta |
-| `panel.html` | Dashboard del dueño (KPIs, reservas, bloqueo de franjas) |
-| `lista-espera.html` | Waitlist → notifica WhatsApp al registrar |
+| `panel.html` | Dashboard del dueño — KPIs, reservas y bloqueos desde Supabase |
+| `lista-espera.html` | Waitlist → INSERT en tabla lista_espera + WhatsApp |
 | `sitemap.xml` | Sitemap enviado a Google Search Console |
 | `robots.txt` | Allow all, referencia sitemap |
 
@@ -46,6 +47,10 @@ Plataforma de reservas de canchas deportivas para Bogotá, Colombia.
 - [x] Drawer de reserva con PSE / Nequi / Tarjeta
 - [x] Código de reserva CGO-XXXXX
 - [x] Web Share API en cancha.html
+- [x] Login de dueños con Supabase Auth (login.html)
+- [x] Panel conectado a Supabase: reservas reales, KPIs, bloqueo de turnos
+- [x] Lista de espera guardada en Supabase + contador en tiempo real
+- [x] cancha.html carga por ?slug=, consulta disponibilidad real, guarda reservas
 
 ## Supabase (conectado oct 2026)
 - **Proyecto**: CanchaGo Project · `https://xqklrfzhpywbyxhskvtq.supabase.co`
@@ -65,20 +70,57 @@ Plataforma de reservas de canchas deportivas para Bogotá, Colombia.
 | `reseñas` | ✅ Creada |
 | `lista_espera` | ✅ Creada |
 
-### Integración actual
-- `registro.html` → `supabase.auth.signUp()` + insert en `canchas` ✅ funcionando en prod
-- `buscar.html` → sigue con data hardcodeada (12 canchas de prueba) — intencional
-- `cancha.html`, `panel.html`, `lista-espera.html` → pendiente conectar a Supabase
+### Integración actual (oct 2026)
+| Archivo | Supabase |
+|---|---|
+| `registro.html` | `auth.signUp()` + INSERT `canchas` ✅ |
+| `login.html` | `auth.signInWithPassword()` → redirige a panel.html ✅ |
+| `panel.html` | Auth check + SELECT `canchas`, `reservas`, `disponibilidad` · INSERT/DELETE `disponibilidad` ✅ |
+| `cancha.html` | SELECT `canchas` por slug · SELECT `disponibilidad` · INSERT `reservas` ✅ |
+| `lista-espera.html` | INSERT `lista_espera` · SELECT count (política pública) ✅ |
+| `buscar.html` | Data hardcodeada (12 canchas demo) — intencional hasta onboarding real |
+
+### Políticas RLS adicionales ejecutadas en SQL Editor
+```sql
+-- lista_espera: cualquiera puede leer el conteo
+create policy "lista_espera: ver conteo"
+  on public.lista_espera for select using (true);
+```
+
+### Trigger ejecutado en SQL Editor
+```sql
+-- Al insertar en reservas, marca automáticamente el slot en disponibilidad
+create or replace function public.handle_reserva_insert()
+returns trigger language plpgsql security definer as $$
+begin
+  insert into public.disponibilidad (cancha_id, fecha, hora, estado, reserva_id)
+  values (new.cancha_id, new.fecha, new.hora, 'reservado', new.id)
+  on conflict (cancha_id, fecha, hora) do nothing;
+  return new;
+end;
+$$;
+create trigger on_reserva_created
+  after insert on public.reservas
+  for each row execute procedure public.handle_reserva_insert();
+```
 
 ### Lección aprendida — RLS PostgreSQL
 - Políticas `FOR INSERT` requieren `WITH CHECK (...)` NO `USING (...)`
 - `FOR UPDATE` y `FOR DELETE` usan `USING (...)`
 - `FOR ALL` necesita ambos: `USING` + `WITH CHECK`
+- `.insert().select()` requiere política SELECT activa en la tabla para retornar la fila insertada
+- `security definer` en funciones/triggers bypasea RLS (útil para operaciones cross-table)
+
+### Patrón Supabase en HTML (UMD — sin bundler)
+```html
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+  const sb = supabase.createClient('https://xqklrfzhpywbyxhskvtq.supabase.co', 'sb_publishable_...');
+</script>
+```
 
 ## Roadmap pendiente (en orden)
-1. **Fase 1 ✅ PARCIAL** — Supabase conectado, registro funcionando
-   - Pendiente: conectar panel.html a reservas reales
-   - Pendiente: guardar lista-espera en tabla lista_espera de Supabase
+1. **Fase 1 ✅ COMPLETA** — Supabase conectado en todas las páginas
    - Pendiente: emails con Resend al confirmar reserva
 2. **Fase 2** — Wompi (pasarela pagos Colombia): PSE, Nequi, tarjeta
    - Webhook firmado HMAC-SHA256 → Edge Function → actualiza tabla reservas
