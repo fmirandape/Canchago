@@ -6,7 +6,7 @@
   <title>Registra tu cancha | CanchaGo Bogotá</title>
   <meta name="description" content="Registra tu cancha deportiva en CanchaGo y empieza a recibir reservas y pagos en línea desde hoy. Gratis los primeros 3 meses." />
   <meta name="robots" content="index, follow" />
-  <link rel="canonical" href="https://canchago.co/registro" />
+  <link rel="canonical" href="https://canchago.com.co/registro" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
@@ -246,7 +246,7 @@
         <div class="benefit-icon">🔗</div>
         <div class="benefit-text">
           <strong>Tu link único</strong>
-          <span>Comparte <strong style="color:var(--green)">canchago.co/tucancha</strong> por WhatsApp o Instagram.</span>
+          <span>Comparte <strong style="color:var(--green)">canchago.com.co/tucancha</strong> por WhatsApp o Instagram.</span>
         </div>
       </div>
       <div class="benefit">
@@ -342,7 +342,7 @@
       <div class="field" id="f-slug">
         <label>Tu link personalizado <span class="req">*</span></label>
         <input type="text" id="inp-slug" placeholder="elnogal" oninput="slugify(this)" />
-        <div class="hint" id="slug-preview">Tu link: <strong style="color:var(--green)">canchago.co/<span id="slug-val">elnogal</span></strong></div>
+        <div class="hint" id="slug-preview">Tu link: <strong style="color:var(--green)">canchago.com.co/<span id="slug-val">elnogal</span></strong></div>
         <div class="error-msg">Solo letras, números y guiones. Mínimo 3 caracteres.</div>
       </div>
 
@@ -490,7 +490,7 @@
       <h2>¡Tu cancha está lista!</h2>
       <p>En menos de 24 horas activamos tu perfil y puedes empezar a recibir reservas. Te avisamos al correo.</p>
       <div class="success-link" onclick="copyLink()">
-        Tu link: <span class="url">canchago.co/<span id="successSlug">tucancha</span></span>
+        Tu link: <span class="url">canchago.com.co/<span id="successSlug">tucancha</span></span>
         <span id="copyTxt">📋 Copiar</span>
       </div>
       <button class="btn-dashboard" onclick="window.location.href='index.html'">Volver al inicio</button>
@@ -686,7 +686,7 @@
   /* ===== COPY LINK ===== */
   function copyLink() {
     const slug = document.getElementById('successSlug').textContent;
-    const url = 'https://canchago.co/' + slug;
+    const url = 'https://canchago.com.co/' + slug;
     navigator.clipboard?.writeText(url).catch(() => {});
     document.getElementById('copyTxt').textContent = '✅ Copiado';
     setTimeout(() => document.getElementById('copyTxt').textContent = '📋 Copiar', 2000);
