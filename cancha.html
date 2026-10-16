@@ -805,7 +805,11 @@
           'https://xqklrfzhpywbyxhskvtq.supabase.co/functions/v1/generar-pago',
           {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer sb_publishable_nwWnl9ohsydrFtzmGjJz4A_dGodbr8D',
+              'apikey': 'sb_publishable_nwWnl9ohsydrFtzmGjJz4A_dGodbr8D',
+            },
             body: JSON.stringify({
               cancha_id:    CANCHA.id,
               fecha:        selectedDate.date,
