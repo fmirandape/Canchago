@@ -323,67 +323,95 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
-  /* ===== COUNTER ANIMATION ===== */
-  const TOTAL = 30;
-  const REGISTERED = 18;
+  const sb = supabase.createClient(
+    'https://xqklrfzhpywbyxhskvtq.supabase.co',
+    'sb_publishable_nwWnl9ohsydrFtzmGjJz4A_dGodbr8D'
+  );
 
-  window.addEventListener('load', () => {
-    setTimeout(() => {
-      const pct = (REGISTERED / TOTAL) * 100;
-      document.getElementById('counterFill').style.width = pct + '%';
-      document.getElementById('counterLabel').innerHTML =
-        `<strong>${REGISTERED} de ${TOTAL}</strong> cupos tomados en la primera fase`;
-    }, 400);
+  const TOTAL = 30;
+  let registeredCount = 18; // fallback mientras carga
+
+  /* ===== COUNTER ===== */
+  function updateCounter(n) {
+    const pct = Math.min((n / TOTAL) * 100, 100);
+    document.getElementById('counterFill').style.width = pct + '%';
+    document.getElementById('counterLabel').innerHTML =
+      `<strong>${n} de ${TOTAL}</strong> cupos tomados en la primera fase`;
+    document.querySelector('.avatars-text').innerHTML =
+      `<strong>${n} dueños</strong> ya en lista`;
+  }
+
+  window.addEventListener('load', async () => {
+    // Cargar conteo real desde Supabase
+    try {
+      const { count } = await sb
+        .from('lista_espera')
+        .select('*', { count: 'exact', head: true });
+      if (count !== null) registeredCount = count;
+    } catch (_) {}
+
+    setTimeout(() => updateCounter(registeredCount), 400);
   });
 
   /* ===== FORM SUBMIT ===== */
-  function submitWaitlist(e) {
+  async function submitWaitlist(e) {
     e.preventDefault();
     const btn = document.getElementById('btnSubmit');
     btn.disabled = true;
     btn.textContent = 'Guardando...';
 
-    // Collect sports selected
-    const sports = [...document.querySelectorAll('.sc.on')].map(s => s.textContent.trim()).join(', ');
-
-    // Build WhatsApp message to notify the owner
-    const nombre    = document.getElementById('w-nombre').value;
-    const cel       = document.getElementById('w-cel').value;
-    const cancha    = document.getElementById('w-cancha').value;
+    const sports    = [...document.querySelectorAll('.sc.on')].map(s => s.textContent.trim());
+    const nombre    = document.getElementById('w-nombre').value.trim();
+    const cel       = document.getElementById('w-cel').value.trim();
+    const cancha    = document.getElementById('w-cancha').value.trim();
     const localidad = document.getElementById('w-localidad').value;
-    const cantidad  = document.getElementById('w-cantidad').value;
-    const actual    = document.getElementById('w-actual').value;
+    const cantidad  = +document.getElementById('w-cantidad').value;
+    const actual    = document.getElementById('w-actual').value || null;
 
+    // Guardar en Supabase
+    const { error } = await sb.from('lista_espera').insert({
+      nombre,
+      whatsapp:      cel,
+      nombre_cancha: cancha,
+      localidad,
+      deportes:      sports,
+      num_canchas:   cantidad,
+      sistema_actual: actual
+    });
+
+    if (error) {
+      btn.disabled = false;
+      btn.textContent = 'Quiero mi cupo gratis →';
+      alert('❌ Error al guardar: ' + error.message);
+      return;
+    }
+
+    // Notificación WhatsApp al fundador
+    const sportsStr = sports.join(', ') || 'No especificó';
     const msg = encodeURIComponent(
       `🎉 *Nuevo registro en CanchaGo*\n\n` +
       `👤 Nombre: ${nombre}\n` +
       `📱 WhatsApp: ${cel}\n` +
       `🏟️ Cancha: ${cancha}\n` +
       `📍 Localidad: ${localidad}\n` +
-      `⚽ Deportes: ${sports || 'No especificó'}\n` +
+      `⚽ Deportes: ${sportsStr}\n` +
       `🔢 Canchas: ${cantidad}\n` +
       `📋 Sistema actual: ${actual || 'No especificó'}`
     );
+    window.open(`https://wa.me/573177867255?text=${msg}`, '_blank');
 
-    // Send notification to your WhatsApp
-    // REEMPLAZA el número de abajo con tu número real (código de país + número, sin +)
-    const TU_NUMERO = '573177867255';
-    window.open(`https://wa.me/${TU_NUMERO}?text=${msg}`, '_blank');
+    // Actualizar contador y mostrar éxito
+    const newCount = registeredCount + 1;
+    registeredCount = newCount;
+    updateCounter(newCount);
 
-    // Show success after short delay
-    setTimeout(() => {
-      const num = REGISTERED + 1;
-      document.getElementById('successNum').textContent = num;
-      document.getElementById('remainingSpots').textContent = (TOTAL - num) + ' cupos';
-      document.getElementById('formContent').style.display = 'none';
-      document.getElementById('successPanel').classList.add('show');
-
-      // Update counter
-      document.getElementById('counterFill').style.width = ((num / TOTAL) * 100) + '%';
-      document.getElementById('counterLabel').innerHTML =
-        `<strong>${num} de ${TOTAL}</strong> cupos tomados en la primera fase`;
-    }, 800);
+    document.getElementById('successNum').textContent = newCount;
+    document.getElementById('remainingSpots').textContent =
+      Math.max(TOTAL - newCount, 0) + ' cupos';
+    document.getElementById('formContent').style.display = 'none';
+    document.getElementById('successPanel').classList.add('show');
   }
 
   /* ===== SHARE ===== */
