@@ -588,6 +588,34 @@
       }
     }
     buildDates();
+
+    // Retorno desde Wompi: mostrar confirmación directamente
+    const pago   = params.get('pago');
+    const codigo = params.get('codigo');
+    if (pago === 'ok' && codigo) {
+      mostrarConfirmacionRetorno(codigo);
+    }
+  }
+
+  function mostrarConfirmacionRetorno(codigo) {
+    document.getElementById('confirmCode').textContent = codigo;
+    document.getElementById('c-fecha').textContent = '—';
+    document.getElementById('c-hora').textContent  = '—';
+    // Buscar la reserva en Supabase para mostrar fecha/hora reales
+    if (sb && codigo) {
+      sb.from('reservas').select('fecha,hora').eq('codigo', codigo).single()
+        .then(({ data }) => {
+          if (data) {
+            document.getElementById('c-fecha').textContent = data.fecha;
+            document.getElementById('c-hora').textContent  = data.hora.slice(0,5);
+          }
+        });
+    }
+    document.getElementById('drawerForm').style.display = 'none';
+    document.getElementById('confirmScreen').classList.add('show');
+    document.getElementById('drawer').style.transform = 'translateY(0)';
+    document.getElementById('overlay').style.opacity  = '1';
+    document.getElementById('overlay').style.pointerEvents = 'auto';
   }
 
   function applyCancha(c) {
@@ -768,50 +796,54 @@
     btn.disabled = true;
     btn.textContent = 'Procesando...';
 
-    const codigo = genCodigo();
-
     if (CANCHA) {
-      const metodoMap = { 'PSE':'pse', 'Nequi':'nequi', 'Tarjeta':'tarjeta' };
-      const { error } = await sb.from('reservas').insert({
-        codigo,
-        cancha_id:        CANCHA.id,
-        cliente_nombre:   nombre,
-        cliente_telefono: cel,
-        cliente_email:    email || null,
-        fecha:            selectedDate.date,
-        hora:             selectedSlot.time,
-        duracion_min:     CANCHA.duracion_min,
-        monto:            CANCHA.precio_hora,
-        metodo_pago:      metodoMap[selectedPay] || 'pse',
-        estado:           'pendiente'
-      });
+      // Llamar Edge Function → crea reserva pendiente + genera URL de Wompi
+      try {
+        const metodoMap = { 'PSE':'pse', 'Nequi':'nequi', 'Tarjeta':'tarjeta' };
+        const params = new URLSearchParams(window.location.search);
+        const resp = await fetch(
+          'https://xqklrfzhpywbyxhskvtq.supabase.co/functions/v1/generar-pago',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              cancha_id:    CANCHA.id,
+              fecha:        selectedDate.date,
+              hora:         selectedSlot.time,
+              duracion_min: CANCHA.duracion_min,
+              monto:        CANCHA.precio_hora,
+              nombre, telefono: cel, email: email || null,
+              metodo_pago:  metodoMap[selectedPay] || 'tarjeta',
+              slug:         params.get('slug') || params.get('c') || '',
+            })
+          }
+        );
+        const result = await resp.json();
+        if (!resp.ok || result.error) throw new Error(result.error || 'Error al generar pago');
 
-      if (error) {
+        // Redirigir a checkout de Wompi
+        window.location.href = result.wompi_url;
+        return;
+
+      } catch (err) {
         btn.disabled = false;
         btn.textContent = 'Pagar y reservar →';
-        alert('❌ No se pudo guardar la reserva: ' + error.message);
+        alert('❌ ' + err.message);
         return;
       }
-
-      // Notificar al fundador por WhatsApp
-      const precio = formatCOP(CANCHA.precio_hora);
-      const msg = encodeURIComponent(
-        `🎉 *Nueva reserva — ${CANCHA.nombre}*\n\n` +
-        `👤 ${nombre}\n📱 ${cel}\n` +
-        `📅 ${selectedDate.label} · ${selectedSlot.label}\n` +
-        `💰 ${precio} · ${selectedPay}\n🎫 ${codigo}`
-      );
-      window.open(`https://wa.me/573177867255?text=${msg}`, '_blank');
     }
 
-    // Show confirmation
+    // Demo mode (sin CANCHA): mostrar confirmación directa
+    const codigo = genCodigo();
+    mostrarConfirmacion(codigo);
+  }
+
+  function mostrarConfirmacion(codigo) {
     document.getElementById('confirmCode').textContent = codigo;
-    document.getElementById('c-fecha').textContent = selectedDate.label;
-    document.getElementById('c-hora').textContent  = selectedSlot.label;
+    document.getElementById('c-fecha').textContent = selectedDate?.label || '—';
+    document.getElementById('c-hora').textContent  = selectedSlot?.label || '—';
     document.getElementById('drawerForm').style.display = 'none';
     document.getElementById('confirmScreen').classList.add('show');
-
-    // Mark slot as taken visually
     document.querySelectorAll('.slot.selected').forEach(s => {
       s.classList.remove('free', 'selected');
       s.classList.add('taken');
