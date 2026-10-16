@@ -520,16 +520,104 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
+  const sb = supabase.createClient(
+    'https://xqklrfzhpywbyxhskvtq.supabase.co',
+    'sb_publishable_nwWnl9ohsydrFtzmGjJz4A_dGodbr8D'
+  );
+
   /* ===== STATE ===== */
+  let CANCHA      = null;
   let selectedDate = null;
   let selectedSlot = null;
-  let selectedPay = 'PSE';
+  let selectedPay  = 'PSE';
 
-  /* ===== DATES ===== */
-  const DAYS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  const DAYS   = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
   const MONTHS = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 
+  /* ===== HELPERS ===== */
+  function generateSlots(apertura, cierre, durMin) {
+    const slots = [];
+    let [h, m] = apertura.split(':').map(Number);
+    const [ch, cm] = cierre.split(':').map(Number);
+    const closeMin = ch * 60 + cm;
+    while (h * 60 + m < closeMin) {
+      slots.push(String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0'));
+      m += durMin;
+      if (m >= 60) { h += Math.floor(m / 60); m = m % 60; }
+    }
+    return slots;
+  }
+
+  function formatHour(t) {
+    const h = parseInt(t);
+    if (h === 12) return '12 pm';
+    return h < 12 ? h + ' am' : (h - 12) + ' pm';
+  }
+
+  function formatCOP(v) {
+    return '$' + Number(v).toLocaleString('es-CO');
+  }
+
+  function formatDur(min) {
+    return min < 60 ? min + 'min' : Math.floor(min / 60) + 'h';
+  }
+
+  function genCodigo() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let c = 'CGO-';
+    for (let i = 0; i < 5; i++) c += chars[Math.floor(Math.random() * chars.length)];
+    return c;
+  }
+
+  /* ===== LOAD CANCHA ===== */
+  async function loadCancha() {
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get('slug') || params.get('c');
+
+    if (slug) {
+      const { data } = await sb.from('canchas')
+        .select('*')
+        .eq('slug', slug)
+        .eq('activa', true)
+        .single();
+      if (data) {
+        CANCHA = data;
+        applyCancha(data);
+      }
+    }
+    buildDates();
+  }
+
+  function applyCancha(c) {
+    const precio = formatCOP(c.precio_hora);
+    const dur    = formatDur(c.duracion_min);
+
+    document.title = c.nombre + ' | CanchaGo Bogotá';
+    document.querySelector('.court-name').textContent = c.nombre;
+    document.querySelector('.court-meta').innerHTML =
+      `<span>📍 ${c.localidad}, Bogotá</span>`;
+    document.querySelector('.sticky-price .amount').textContent = precio;
+    document.querySelector('.sticky-price .per').textContent   = 'COP / ' + dur;
+    document.getElementById('drawerSubtitle').textContent = c.nombre + ' · ' + c.localidad;
+
+    // Tags
+    const tags = document.querySelector('.court-tags');
+    tags.innerHTML = `<span class="tag available">● Disponible hoy</span>`;
+    (c.deportes || []).forEach(d => {
+      const ico = d.includes('Fútbol') ? '⚽' : d.includes('Pádel') || d.includes('Tenis') ? '🎾' : d.includes('Básquet') ? '🏀' : '🏐';
+      tags.innerHTML += `<span class="tag">${ico} ${d}</span>`;
+    });
+    if (c.luz)                  tags.innerHTML += `<span class="tag">💡 Iluminación</span>`;
+    if (c.cubierta)             tags.innerHTML += `<span class="tag">🏠 Cubierta</span>`;
+    if (c.parqueadero !== 'no') tags.innerHTML += `<span class="tag">🅿️ Parqueadero${c.parqueadero === 'si-pago' ? ' (pago)' : ''}</span>`;
+
+    if (c.descripcion) document.getElementById('desc').textContent = c.descripcion;
+    if (c.direccion)   document.querySelector('.map-addr').textContent = c.direccion + ', ' + c.localidad;
+  }
+
+  /* ===== DATES ===== */
   function buildDates() {
     const strip = document.getElementById('dateStrip');
     const today = new Date();
@@ -545,8 +633,8 @@
         <div class="dc-day">${DAYS[d.getDay()]}</div>
         <div class="dc-num">${d.getDate()}</div>
         <div class="dc-mes">${MONTHS[d.getMonth()]}</div>`;
-      chip.dataset.date = d.toISOString().split('T')[0];
-      chip.dataset.label = (i === 0 ? 'Hoy' : i === 1 ? 'Mañana' : DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()]);
+      chip.dataset.date  = d.toISOString().split('T')[0];
+      chip.dataset.label = i === 0 ? 'Hoy' : i === 1 ? 'Mañana' : DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()];
       chip.onclick = () => selectDate(chip);
       strip.appendChild(chip);
     }
@@ -559,49 +647,68 @@
     chip.setAttribute('aria-selected', true);
     selectedDate = chip.dataset;
     document.getElementById('slotsLabel').textContent = 'Turnos para ' + chip.dataset.label.toLowerCase();
-    buildSlots(chip.dataset.date);
+    loadSlotsForDate(chip.dataset.date);
     clearSlot();
   }
 
   /* ===== SLOTS ===== */
-  const TAKEN_BASE = { 0: [0,3,6], 1: [1,4], 2: [0,2,5,7], 3: [3,6], 4: [1,2], 5: [0,4,7], 6: [2,5] };
-  const TIMES = ['06:00','07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'];
+  const DEMO_TAKEN = { 0:[0,3,6], 1:[1,4], 2:[0,2,5,7], 3:[3,6], 4:[1,2], 5:[0,4,7], 6:[2,5] };
+  const DEMO_TIMES = ['06:00','07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'];
 
-  function buildSlots(dateStr) {
-    const d = new Date(dateStr);
-    const dow = d.getDay();
-    const takenIdx = TAKEN_BASE[dow] || [];
+  async function loadSlotsForDate(dateStr) {
+    const grid = document.getElementById('slotsGrid');
+    grid.innerHTML = '<div style="color:var(--muted);font-size:.85rem;grid-column:1/-1;padding:.5rem 0">Cargando...</div>';
+
+    if (CANCHA) {
+      const { data: disp } = await sb.from('disponibilidad')
+        .select('hora')
+        .eq('cancha_id', CANCHA.id)
+        .eq('fecha', dateStr);
+
+      const takenHoras = new Set((disp || []).map(d => d.hora));
+      const slots = generateSlots(CANCHA.hora_apertura, CANCHA.hora_cierre, CANCHA.duracion_min);
+      renderSlots(dateStr, slots, takenHoras);
+    } else {
+      const dow = new Date(dateStr).getDay();
+      const takenIdx = DEMO_TAKEN[dow] || [];
+      renderSlots(dateStr, DEMO_TIMES, new Set(takenIdx.map(i => DEMO_TIMES[i])));
+    }
+  }
+
+  function renderSlots(dateStr, times, takenHoras) {
     const now = new Date();
     const isToday = dateStr === now.toISOString().split('T')[0];
-    const grid = document.getElementById('slotsGrid');
+    const precio  = CANCHA ? formatCOP(CANCHA.precio_hora) : '$80.000';
+    const dur     = CANCHA ? formatDur(CANCHA.duracion_min) : '1 hora';
+    const grid    = document.getElementById('slotsGrid');
     grid.innerHTML = '';
 
-    TIMES.forEach((t, i) => {
-      const [h] = t.split(':').map(Number);
+    if (!times.length) {
+      grid.innerHTML = '<p style="color:var(--muted);font-size:.85rem;grid-column:1/-1">Sin turnos configurados</p>';
+      return;
+    }
+
+    times.forEach(t => {
+      const h = parseInt(t);
       const pastToday = isToday && h <= now.getHours();
-      const taken = takenIdx.includes(i) || pastToday;
+      const taken = takenHoras.has(t) || pastToday;
       const el = document.createElement('div');
       el.className = 'slot ' + (taken ? 'taken' : 'free');
       el.setAttribute('role', 'option');
       el.setAttribute('aria-disabled', taken);
       el.innerHTML = `
-        <div class="s-time">${formatHour(h)}</div>
-        <div class="s-dur">${taken && pastToday ? 'Pasado' : '1 hora'}</div>
-        ${taken ? '' : '<div class="s-price">$80.000</div>'}`;
-      if (!taken) el.onclick = () => selectSlot(el, t, h);
+        <div class="s-time">${formatHour(t)}</div>
+        <div class="s-dur">${taken && pastToday ? 'Pasado' : dur}</div>
+        ${taken ? '' : `<div class="s-price">${precio}</div>`}`;
+      if (!taken) el.onclick = () => selectSlot(el, t);
       grid.appendChild(el);
     });
   }
 
-  function formatHour(h) {
-    if (h === 12) return '12 pm';
-    return h < 12 ? h + ' am' : (h - 12) + ' pm';
-  }
-
-  function selectSlot(el, time, h) {
+  function selectSlot(el, time) {
     document.querySelectorAll('.slot.free').forEach(s => s.classList.remove('selected'));
     el.classList.add('selected');
-    selectedSlot = { time, label: formatHour(h) };
+    selectedSlot = { time, label: formatHour(time) };
     document.getElementById('stickyTime').textContent = '📅 ' + selectedDate.label + ' · ⏰ ' + selectedSlot.label;
     const btn = document.getElementById('btnReserve');
     btn.disabled = false;
@@ -620,11 +727,14 @@
   /* ===== DRAWER ===== */
   function openDrawer() {
     if (!selectedSlot) return;
+    const precio     = CANCHA ? formatCOP(CANCHA.precio_hora) : '$80.000';
+    const dur        = CANCHA ? formatDur(CANCHA.duracion_min) : '1 hora';
+    const canchaLabel = CANCHA ? CANCHA.nombre : 'El Nogal — Fútbol 5';
     document.getElementById('bookingSummary').innerHTML = `
-      <div class="bs-row"><span class="bs-label">Cancha</span><span class="bs-val">El Nogal — Fútbol 5</span></div>
+      <div class="bs-row"><span class="bs-label">Cancha</span><span class="bs-val">${canchaLabel}</span></div>
       <div class="bs-row"><span class="bs-label">Fecha</span><span class="bs-val">${selectedDate.label}</span></div>
-      <div class="bs-row"><span class="bs-label">Horario</span><span class="bs-val">${selectedSlot.label} (1 hora)</span></div>
-      <div class="bs-row bs-total"><span class="bs-label">Total</span><span class="bs-val">$80.000 COP</span></div>`;
+      <div class="bs-row"><span class="bs-label">Horario</span><span class="bs-val">${selectedSlot.label} (${dur})</span></div>
+      <div class="bs-row bs-total"><span class="bs-label">Total</span><span class="bs-val">${precio} COP</span></div>`;
     document.getElementById('drawerForm').style.display = 'block';
     document.getElementById('confirmScreen').classList.remove('show');
     document.getElementById('drawerOverlay').classList.add('open');
@@ -646,18 +756,61 @@
     selectedPay = el.textContent.trim();
   }
 
-  /* ===== CONFIRM ===== */
-  function confirmBooking() {
+  /* ===== CONFIRM BOOKING ===== */
+  async function confirmBooking() {
     const nombre = document.getElementById('d-nombre').value.trim();
-    const cel = document.getElementById('d-cel').value.trim();
+    const cel    = document.getElementById('d-cel').value.trim();
+    const email  = document.getElementById('d-email').value.trim();
     if (!nombre) { document.getElementById('d-nombre').focus(); return; }
-    if (!cel) { document.getElementById('d-cel').focus(); return; }
-    const code = 'CGO-' + Math.floor(10000 + Math.random() * 90000);
-    document.getElementById('confirmCode').textContent = code;
+    if (!cel)    { document.getElementById('d-cel').focus(); return; }
+
+    const btn = document.querySelector('.btn-pay');
+    btn.disabled = true;
+    btn.textContent = 'Procesando...';
+
+    const codigo = genCodigo();
+
+    if (CANCHA) {
+      const metodoMap = { 'PSE':'pse', 'Nequi':'nequi', 'Tarjeta':'tarjeta' };
+      const { error } = await sb.from('reservas').insert({
+        codigo,
+        cancha_id:        CANCHA.id,
+        cliente_nombre:   nombre,
+        cliente_telefono: cel,
+        cliente_email:    email || null,
+        fecha:            selectedDate.date,
+        hora:             selectedSlot.time,
+        duracion_min:     CANCHA.duracion_min,
+        monto:            CANCHA.precio_hora,
+        metodo_pago:      metodoMap[selectedPay] || 'pse',
+        estado:           'pendiente'
+      });
+
+      if (error) {
+        btn.disabled = false;
+        btn.textContent = 'Pagar y reservar →';
+        alert('❌ No se pudo guardar la reserva: ' + error.message);
+        return;
+      }
+
+      // Notificar al fundador por WhatsApp
+      const precio = formatCOP(CANCHA.precio_hora);
+      const msg = encodeURIComponent(
+        `🎉 *Nueva reserva — ${CANCHA.nombre}*\n\n` +
+        `👤 ${nombre}\n📱 ${cel}\n` +
+        `📅 ${selectedDate.label} · ${selectedSlot.label}\n` +
+        `💰 ${precio} · ${selectedPay}\n🎫 ${codigo}`
+      );
+      window.open(`https://wa.me/573177867255?text=${msg}`, '_blank');
+    }
+
+    // Show confirmation
+    document.getElementById('confirmCode').textContent = codigo;
     document.getElementById('c-fecha').textContent = selectedDate.label;
-    document.getElementById('c-hora').textContent = selectedSlot.label;
+    document.getElementById('c-hora').textContent  = selectedSlot.label;
     document.getElementById('drawerForm').style.display = 'none';
     document.getElementById('confirmScreen').classList.add('show');
+
     // Mark slot as taken visually
     document.querySelectorAll('.slot.selected').forEach(s => {
       s.classList.remove('free', 'selected');
@@ -671,28 +824,32 @@
   let descExpanded = false;
   function toggleDesc() {
     descExpanded = !descExpanded;
-    const d = document.getElementById('desc');
-    d.classList.toggle('collapsed', !descExpanded);
+    document.getElementById('desc').classList.toggle('collapsed', !descExpanded);
     document.getElementById('showMore').textContent = descExpanded ? 'Ver menos ↑' : 'Leer más ↓';
   }
 
   /* ===== SHARE ===== */
   function shareCancha() {
+    const title = CANCHA ? CANCHA.nombre : 'Cancha Central El Nogal';
+    const loc   = CANCHA ? CANCHA.localidad : 'Usaquén';
     if (navigator.share) {
-      navigator.share({ title: 'Cancha Central El Nogal', text: 'Reserva tu turno en El Nogal, Usaquén', url: window.location.href });
+      navigator.share({ title, text: `Reserva tu turno en ${title}, ${loc}`, url: window.location.href });
     } else {
-      navigator.clipboard?.writeText(window.location.href);
+      try { navigator.clipboard.writeText(window.location.href); } catch(_) {}
       alert('Link copiado al portapapeles');
     }
   }
 
   /* ===== MAPS ===== */
   function openMaps() {
-    window.open('https://maps.google.com/?q=Cra+7+%23119-52,+Usaquén,+Bogotá', '_blank');
+    const addr = CANCHA?.direccion
+      ? CANCHA.direccion + ', ' + CANCHA.localidad + ', Bogotá'
+      : 'Cra 7 #119-52, Usaquén, Bogotá';
+    window.open('https://maps.google.com/?q=' + encodeURIComponent(addr), '_blank');
   }
 
   /* ===== INIT ===== */
-  buildDates();
+  loadCancha();
 </script>
 </body>
 </html>
