@@ -501,6 +501,14 @@
         <div class="pay-opt" onclick="selectPay(this)"><span class="pay-icon">💳</span>Tarjeta</div>
       </div>
 
+      <label style="display:flex;align-items:flex-start;gap:.6rem;margin-bottom:1rem;cursor:pointer">
+        <input type="checkbox" id="aceptaPrivacidad" style="margin-top:3px;accent-color:var(--green);flex-shrink:0" />
+        <span style="font-size:.78rem;color:var(--muted);line-height:1.4">
+          Acepto el tratamiento de mis datos personales según la
+          <a href="privacidad.html" target="_blank" style="color:var(--green)">Política de Privacidad</a>
+          de CanchaGo (Ley 1581 de 2012).
+        </span>
+      </label>
       <button class="btn-pay" onclick="confirmBooking()">Pagar y reservar →</button>
       <p class="pay-note">🔒 Pago seguro. Si cancelas con 24h de anticipación, reembolso total.</p>
     </div>
@@ -791,6 +799,10 @@
     const email  = document.getElementById('d-email').value.trim();
     if (!nombre) { document.getElementById('d-nombre').focus(); return; }
     if (!cel)    { document.getElementById('d-cel').focus(); return; }
+    if (!document.getElementById('aceptaPrivacidad').checked) {
+      alert('Debes aceptar la política de privacidad para continuar.');
+      return;
+    }
 
     const btn = document.querySelector('.btn-pay');
     btn.disabled = true;
