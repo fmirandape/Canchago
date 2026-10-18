@@ -28,6 +28,7 @@ Plataforma de reservas de canchas deportivas para Bogotá, Colombia.
 | `buscar.html` | Búsqueda con filtros: deporte, localidad, luz, parqueadero, cubierta |
 | `panel.html` | Dashboard del dueño — KPIs, reservas y bloqueos desde Supabase |
 | `lista-espera.html` | Waitlist → INSERT en tabla lista_espera + WhatsApp |
+| `privacidad.html` | Política de privacidad — Ley 1581 de 2012 |
 | `sitemap.xml` | Sitemap enviado a Google Search Console |
 | `robots.txt` | Allow all, referencia sitemap |
 
@@ -53,6 +54,9 @@ Plataforma de reservas de canchas deportivas para Bogotá, Colombia.
 - [x] cancha.html carga por ?slug=, consulta disponibilidad real, guarda reservas
 - [x] Wompi pagos: PSE, Nequi, tarjeta — checkout hosted, webhook HMAC-SHA256
 - [x] Email de confirmación al cliente vía Resend desde reservas@canchago.com.co
+- [x] Security headers en GitHub Pages (_headers)
+- [x] Rate limiting en Edge Function generar-pago (10 req/min por IP)
+- [x] Ley 1581 — política de privacidad + checkbox obligatorio en reserva
 
 ## Supabase (conectado oct 2026)
 - **Proyecto**: CanchaGo Project · `https://xqklrfzhpywbyxhskvtq.supabase.co`
@@ -146,10 +150,16 @@ create trigger on_reserva_created
 - Retiene 5% como comisión
 - Con 5-10 canchas es manejable; escalar con subcomercios Wompi cuando haya volumen
 
+## Fase 3 — Seguridad (oct 2026 — completa)
+- **`_headers`**: X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, HSTS
+- **Rate limiting**: tabla `rate_limits` + función `check_rate_limit()` en Postgres · máx 10 req/min por IP en `generar-pago`
+- **Ley 1581**: `privacidad.html` con política completa · checkbox obligatorio en formulario de reserva · link en footer de index.html
+- **Archivos del proyecto**: agregar `privacidad.html` a la tabla de archivos
+
 ## Roadmap pendiente (en orden)
 1. **Fase 1 ✅ COMPLETA** — Supabase + Auth + todas las páginas conectadas
 2. **Fase 2 ✅ COMPLETA** — Wompi pagos + emails de confirmación Resend
-3. **Fase 3** — Seguridad: headers CSP, rate limiting, Ley 1581
+3. **Fase 3 ✅ COMPLETA** — Seguridad: headers, rate limiting, Ley 1581
 4. **Fase 4** — Lanzamiento: activar modo producción Wompi, onboarding 30 canchas de lista de espera, PWA
 
 ## Costos actuales
