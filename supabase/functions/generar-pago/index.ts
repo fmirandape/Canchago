@@ -27,6 +27,20 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
 
   try {
+    // Rate limiting: máx 10 requests por IP por minuto
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim()
+      ?? req.headers.get("cf-connecting-ip")
+      ?? "unknown";
+
+    const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+    const { data: allowed } = await sb.rpc("check_rate_limit", { p_ip: ip, p_max: 10 });
+    if (!allowed) {
+      return new Response(
+        JSON.stringify({ error: "Demasiadas solicitudes. Intenta en un minuto." }),
+        { status: 429, headers: { ...CORS, "Content-Type": "application/json" } }
+      );
+    }
+
     const {
       cancha_id, fecha, hora, duracion_min, monto,
       nombre, telefono, email, metodo_pago, slug,
@@ -39,8 +53,6 @@ serve(async (req) => {
       );
     }
 
-    // Crear reserva pendiente (service role bypasa RLS)
-    const sb     = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
     const codigo = genCodigo();
 
     const { error: dbError } = await sb.from("reservas").insert({
@@ -59,11 +71,9 @@ serve(async (req) => {
 
     if (dbError) throw new Error(dbError.message);
 
-    // Integrity hash: SHA256(reference + amount_in_cents + currency + integrity_secret)
     const amountCents = monto * 100;
     const integrity   = await sha256hex(`${codigo}${amountCents}COP${WOMPI_INTEGRITY}`);
 
-    // Construir URL de checkout Wompi
     const redirectBase = "https://canchago.com.co/cancha.html";
     const redirectUrl  = slug
       ? `${redirectBase}?slug=${slug}&pago=ok&codigo=${codigo}`
@@ -76,7 +86,7 @@ serve(async (req) => {
     wompiUrl.searchParams.set("reference",           codigo);
     wompiUrl.searchParams.set("signature:integrity", integrity);
     wompiUrl.searchParams.set("redirect-url",        redirectUrl);
-    if (email)    wompiUrl.searchParams.set("customer-data:email",        email);
+    if (email) wompiUrl.searchParams.set("customer-data:email", email);
     wompiUrl.searchParams.set("customer-data:full-name",    nombre);
     wompiUrl.searchParams.set("customer-data:phone-number", telefono.replace(/\D/g, ""));
 
