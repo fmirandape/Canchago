@@ -51,6 +51,8 @@ Plataforma de reservas de canchas deportivas para Bogotá, Colombia.
 - [x] Panel conectado a Supabase: reservas reales, KPIs, bloqueo de turnos
 - [x] Lista de espera guardada en Supabase + contador en tiempo real
 - [x] cancha.html carga por ?slug=, consulta disponibilidad real, guarda reservas
+- [x] Wompi pagos: PSE, Nequi, tarjeta — checkout hosted, webhook HMAC-SHA256
+- [x] Email de confirmación al cliente vía Resend desde reservas@canchago.com.co
 
 ## Supabase (conectado oct 2026)
 - **Proyecto**: CanchaGo Project · `https://xqklrfzhpywbyxhskvtq.supabase.co`
@@ -119,13 +121,36 @@ create trigger on_reserva_created
 </script>
 ```
 
+## Wompi (oct 2026 — en producción sandbox)
+- **Cuenta**: comercios.wompi.co — cuenta propia de CanchaGo (modelo: CanchaGo recibe el dinero, transfiere 95% al dueño)
+- **Modo actual**: Sandbox (pruebas) — cambiar a producción cuando se lancen canchas reales
+- **Para pasar a producción**: Wompi → "Desactivar modo de pruebas" + actualizar 3 secrets en Supabase con llaves `prod_`
+- **Edge Functions desplegadas**:
+  - `generar-pago`: crea reserva pendiente + integrity hash + URL checkout Wompi
+  - `wompi-webhook`: verifica HMAC-SHA256 + actualiza estado reserva + envía email
+- **Webhook URL**: `https://xqklrfzhpywbyxhskvtq.supabase.co/functions/v1/wompi-webhook`
+- **Secrets en Supabase**: `WOMPI_PUBLIC_KEY`, `WOMPI_INTEGRITY_SECRET`, `WOMPI_EVENTS_SECRET`
+- **Flujo**: cliente reserva → `generar-pago` → Wompi checkout → `wompi-webhook` → reserva `confirmada` + email
+
+## Resend (oct 2026 — activo)
+- **Cuenta**: farith.miranda@gmail.com
+- **Dominio verificado**: canchago.com.co (DNS auto-configurado vía Cloudflare en 3 min)
+- **From**: `reservas@canchago.com.co`
+- **Secret en Supabase**: `RESEND_API_KEY`
+- **Cuándo envía**: al confirmar pago (estado APPROVED en webhook de Wompi)
+- **Contenido email**: código CGO-XXXXX, cancha, fecha, hora, monto pagado
+
+## Modelo de negocio — operación
+- CanchaGo recibe el 100% del pago vía Wompi
+- Transfiere 95% al dueño cada semana (manualmente en MVP)
+- Retiene 5% como comisión
+- Con 5-10 canchas es manejable; escalar con subcomercios Wompi cuando haya volumen
+
 ## Roadmap pendiente (en orden)
-1. **Fase 1 ✅ COMPLETA** — Supabase conectado en todas las páginas
-   - Pendiente: emails con Resend al confirmar reserva
-2. **Fase 2** — Wompi (pasarela pagos Colombia): PSE, Nequi, tarjeta
-   - Webhook firmado HMAC-SHA256 → Edge Function → actualiza tabla reservas
+1. **Fase 1 ✅ COMPLETA** — Supabase + Auth + todas las páginas conectadas
+2. **Fase 2 ✅ COMPLETA** — Wompi pagos + emails de confirmación Resend
 3. **Fase 3** — Seguridad: headers CSP, rate limiting, Ley 1581
-4. **Fase 4** — Lanzamiento: 30 canchas de lista de espera, PWA, GSC
+4. **Fase 4** — Lanzamiento: activar modo producción Wompi, onboarding 30 canchas de lista de espera, PWA
 
 ## Costos actuales
 - Todo en $0/mes (GitHub Pages + Cloudflare Free + Supabase Free tier)
