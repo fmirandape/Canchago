@@ -1005,11 +1005,11 @@
         <div class="field-group">
           <label class="field-label">Foto de la cancha</label>
           <div id="foto-preview" style="width:100%;height:160px;border-radius:10px;overflow:hidden;background:linear-gradient(160deg,#0d2b1a,#1a3a2a);display:flex;align-items:center;justify-content:center;font-size:3rem;margin-bottom:.5rem">⚽</div>
-          <label style="display:flex;align-items:center;gap:.6rem;cursor:pointer">
-            <input type="file" id="foto-input" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="subirFoto(this)" />
-            <span class="btn-save-block" style="padding:.55rem 1rem;font-size:.85rem;display:inline-block" onclick="document.getElementById('foto-input').click()">📷 Subir foto</span>
+          <input type="file" id="foto-input" accept="image/jpeg,image/png,image/webp" style="display:none" />
+          <div style="display:flex;align-items:center;gap:.6rem">
+            <button class="btn-save-block" style="padding:.55rem 1rem;font-size:.85rem" onclick="document.getElementById('foto-input').click()">📷 Subir foto</button>
             <span id="foto-status" style="color:var(--muted);font-size:.8rem"></span>
-          </label>
+          </div>
           <p style="color:var(--muted);font-size:.75rem;margin-top:.3rem">JPG, PNG o WebP · máx 2MB · recomendado 1200×675px</p>
         </div>
 
@@ -1711,38 +1711,42 @@ async function cargarFormCancha() {
   }
 }
 
-async function subirFoto(input) {
-  const file = input.files[0];
+async function subirFoto(file) {
   if (!file) return;
   if (file.size > 2 * 1024 * 1024) { showToast('La foto no puede superar 2MB'); return; }
   const status = document.getElementById('foto-status');
   status.textContent = 'Subiendo…';
+  showToast('Iniciando subida…');
 
   const { data: { session } } = await sb.auth.getSession();
   const userId = session?.user?.id;
-  if (!userId) { status.textContent = 'Error: sesión'; return; }
+  if (!userId) { showToast('Error: no hay sesión'); status.textContent = ''; return; }
 
-  const ext  = file.name.split('.').pop().toLowerCase() || 'jpg';
+  const ext  = (file.name.split('.').pop() || 'jpg').toLowerCase();
   const path = `${userId}/${canchaId}.${ext}`;
+  showToast('Subiendo a Storage…');
 
   const { error: upErr } = await sb.storage.from('canchas-fotos').upload(path, file, { upsert: true });
-  if (upErr) {
-    status.textContent = 'Error';
-    showToast('Error al subir: ' + upErr.message);
-    return;
-  }
+  if (upErr) { showToast('Error Storage: ' + upErr.message); status.textContent = ''; return; }
 
+  showToast('Guardando URL…');
   const { data: urlData } = sb.storage.from('canchas-fotos').getPublicUrl(path);
-  const publicUrl = urlData.publicUrl + '?t=' + Date.now();
+  const publicUrl = urlData.publicUrl;
 
-  const { error: dbErr } = await sb.from('canchas').update({ foto_url: urlData.publicUrl }).eq('id', canchaId);
-  if (dbErr) { status.textContent = 'Error al guardar'; showToast('Error: ' + dbErr.message); return; }
+  const { error: dbErr } = await sb.from('canchas').update({ foto_url: publicUrl }).eq('id', canchaId);
+  if (dbErr) { showToast('Error DB: ' + dbErr.message); status.textContent = ''; return; }
 
-  CANCHA.foto_url = urlData.publicUrl;
-  document.getElementById('foto-preview').innerHTML = `<img src="${publicUrl}" style="width:100%;height:100%;object-fit:cover" />`;
+  CANCHA.foto_url = publicUrl;
+  document.getElementById('foto-preview').innerHTML = `<img src="${publicUrl}?t=${Date.now()}" style="width:100%;height:100%;object-fit:cover" />`;
   status.textContent = '✅ Foto guardada';
+  showToast('✅ Foto guardada correctamente');
   setTimeout(() => status.textContent = '', 3000);
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  const fotoInput = document.getElementById('foto-input');
+  if (fotoInput) fotoInput.addEventListener('change', e => subirFoto(e.target.files[0]));
+});
 
 async function guardarCancha() {
   const btn = document.getElementById('btnGuardarCancha');
