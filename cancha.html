@@ -94,6 +94,19 @@
     /* MAIN CONTENT */
     .content { max-width: 780px; margin: 0 auto; padding: 1.5rem 1.25rem; }
 
+    /* FOTO HERO */
+    .court-hero {
+      width: 100%; height: 240px;
+      object-fit: cover; display: block;
+      background: linear-gradient(160deg, #0d2b1a, #1a3a2a);
+    }
+    .court-hero-placeholder {
+      width: 100%; height: 240px;
+      background: linear-gradient(160deg, #0d2b1a, #1a3a2a);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 5rem;
+    }
+
     /* HEADER INFO */
     .court-header { margin-bottom: 1.25rem; }
     .court-tags { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: .75rem; }
@@ -337,6 +350,9 @@
 </div>
 
 <!-- CONTENT -->
+<!-- FOTO HERO -->
+<div id="court-hero-wrap"></div>
+
 <main class="content">
 
   <!-- HEADER -->
@@ -651,6 +667,17 @@
 
     if (c.descripcion) document.getElementById('desc').textContent = c.descripcion;
     if (c.direccion)   document.querySelector('.map-addr').textContent = c.direccion + ', ' + c.localidad;
+
+    // Foto hero
+    const heroWrap = document.getElementById('court-hero-wrap');
+    if (c.foto_url) {
+      heroWrap.innerHTML = `<img src="${c.foto_url}" alt="${c.nombre}" class="court-hero" />`;
+    } else {
+      const ico = (c.deportes || []).some(d => d.includes('Fútbol')) ? '⚽'
+        : (c.deportes || []).some(d => d.includes('Pádel') || d.includes('Tenis')) ? '🎾'
+        : (c.deportes || []).some(d => d.includes('Básquet')) ? '🏀' : '🏐';
+      heroWrap.innerHTML = `<div class="court-hero-placeholder">${ico}</div>`;
+    }
   }
 
   /* ===== DATES ===== */
