@@ -1717,14 +1717,28 @@ async function subirFoto(input) {
   if (file.size > 2 * 1024 * 1024) { showToast('La foto no puede superar 2MB'); return; }
   const status = document.getElementById('foto-status');
   status.textContent = 'Subiendo…';
-  const ext  = file.name.split('.').pop().toLowerCase();
-  const path = `${sb.auth.getUser ? (await sb.auth.getUser()).data.user?.id : canchaId}/${canchaId}.${ext}`;
+
+  const { data: { session } } = await sb.auth.getSession();
+  const userId = session?.user?.id;
+  if (!userId) { status.textContent = 'Error: sesión'; return; }
+
+  const ext  = file.name.split('.').pop().toLowerCase() || 'jpg';
+  const path = `${userId}/${canchaId}.${ext}`;
+
   const { error: upErr } = await sb.storage.from('canchas-fotos').upload(path, file, { upsert: true });
-  if (upErr) { status.textContent = 'Error al subir'; showToast('Error: ' + upErr.message); return; }
-  const { data: { publicUrl } } = sb.storage.from('canchas-fotos').getPublicUrl(path);
-  const { error: dbErr } = await sb.from('canchas').update({ foto_url: publicUrl }).eq('id', canchaId);
-  if (dbErr) { status.textContent = 'Error al guardar'; return; }
-  CANCHA.foto_url = publicUrl;
+  if (upErr) {
+    status.textContent = 'Error';
+    showToast('Error al subir: ' + upErr.message);
+    return;
+  }
+
+  const { data: urlData } = sb.storage.from('canchas-fotos').getPublicUrl(path);
+  const publicUrl = urlData.publicUrl + '?t=' + Date.now();
+
+  const { error: dbErr } = await sb.from('canchas').update({ foto_url: urlData.publicUrl }).eq('id', canchaId);
+  if (dbErr) { status.textContent = 'Error al guardar'; showToast('Error: ' + dbErr.message); return; }
+
+  CANCHA.foto_url = urlData.publicUrl;
   document.getElementById('foto-preview').innerHTML = `<img src="${publicUrl}" style="width:100%;height:100%;object-fit:cover" />`;
   status.textContent = '✅ Foto guardada';
   setTimeout(() => status.textContent = '', 3000);
