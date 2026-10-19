@@ -410,8 +410,21 @@
   /* ===== SUPABASE — canchas reales ===== */
   let realCourts = [];
 
+  const DEPORTE_LABEL = {
+    'futbol5':'Fútbol 5','fútbol5':'Fútbol 5','futbol 5':'Fútbol 5',
+    'futbol7':'Fútbol 7','fútbol7':'Fútbol 7','futbol 7':'Fútbol 7',
+    'padel':'Pádel','pádel':'Pádel',
+    'tenis':'Tenis',
+    'basquet':'Básquet','básquet':'Básquet','basketball':'Básquet',
+    'voleibol':'Voleibol','volleyball':'Voleibol',
+  };
+  function normDeporte(raw) {
+    if (!raw) return 'Fútbol 5';
+    return DEPORTE_LABEL[raw.toLowerCase().trim()] || raw;
+  }
+
   function sbCanchaToCard(c) {
-    const deporte  = (c.deportes || [])[0] || 'Fútbol 5';
+    const deporte  = normDeporte((c.deportes || [])[0]);
     const icon     = deporte.includes('Fútbol') ? '⚽' : deporte.includes('Pádel') || deporte.includes('Tenis') ? '🎾' : deporte.includes('Básquet') ? '🏀' : '🏐';
     const tags     = [];
     if (c.cesped)      tags.push('Césped sint.');
