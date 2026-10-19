@@ -168,9 +168,15 @@ create trigger on_reserva_created
 - Dominio canchago.com.co: ~$60K COP/año (ya pagado)
 
 ## Modelo de negocio
-- Comisión 5% sobre cada reserva procesada
-- Plan Pro dueños: $49,900 COP/mes (hasta 5 canchas)
-- Precio prom reserva Bogotá: $78,000 COP/hora
+- Precio prom reserva Bogotá: $78.000 COP/hora
+- Basado en análisis de competidores oct 2026: Canchify (10% comisión), ReservaSimple (0% + SaaS)
+
+### Planes (actualizados oct 2026)
+| Plan | Precio | Comisión | Canchas | Diferencial |
+|---|---|---|---|---|
+| **Gratis** | $0/mes | 5% por reserva | 1 · 30 días prueba | Sin barrera de entrada |
+| **Básico** | $49.900/mes | 0% | 1 · ilimitadas | Conviene si hace +10 reservas/mes |
+| **Pro** | $89.900/mes | 0% | Hasta 5 | + soporte WhatsApp directo |
 
 ## Artefactos publicados
 - Roadmap: https://claude.ai/artifact/6vTB3NqyDRLpJN2gf3rcBV
