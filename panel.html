@@ -551,6 +551,21 @@
     }
     .form-select:focus { outline: none; border-color: var(--green); }
 
+    .form-input {
+      width: 100%; background: var(--card2);
+      border: 1.5px solid var(--border2); border-radius: 9px;
+      color: var(--text); padding: .7rem .9rem;
+      font-size: .925rem; font-family: inherit; outline: none;
+      transition: border-color .2s;
+    }
+    .form-input:focus { border-color: var(--green); }
+    .form-input::placeholder { color: var(--muted); }
+    .field-label {
+      display: block; font-size: .78rem; font-weight: 600;
+      color: var(--muted); margin-bottom: .4rem; letter-spacing: .03em;
+    }
+    .field-group { display: flex; flex-direction: column; gap: .4rem; }
+
     .btn-save-block {
       background: var(--green);
       color: #000;
@@ -850,6 +865,9 @@
       </div>
     </header>
 
+    <!-- ===== SECCIONES ===== -->
+    <div id="sec-hoy">
+
     <!-- KPI CARDS -->
     <div class="kpi-grid">
       <div class="kpi-card green">
@@ -937,6 +955,102 @@
         <p class="block-hint">Toca para seleccionar · <span id="selectedCount">0</span> horas seleccionadas</p>
       </div>
 
+    </div>
+
+    </div><!-- /sec-hoy -->
+
+    <!-- ===== SECCIÓN RESERVAS ===== -->
+    <div id="sec-reservas" style="display:none">
+      <div class="section-header" style="margin-bottom:1.25rem">
+        <span class="section-title">Todas las reservas</span>
+        <div style="display:flex;gap:.5rem;align-items:center">
+          <select class="form-select" id="filtroEstado" onchange="filtrarReservasAll()" style="font-size:.82rem;padding:.4rem .7rem">
+            <option value="">Todos los estados</option>
+            <option value="confirmada">Confirmadas</option>
+            <option value="pendiente">Pendientes</option>
+            <option value="cancelada">Canceladas</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="res-table">
+          <thead><tr><th>Fecha</th><th>Hora</th><th>Cliente</th><th>Teléfono</th><th>Monto</th><th>Estado</th></tr></thead>
+          <tbody id="tbodyReservasAll"></tbody>
+        </table>
+      </div>
+      <p id="reservasAllEmpty" style="display:none;color:var(--muted);text-align:center;padding:2rem">Sin reservas registradas.</p>
+    </div>
+
+    <!-- ===== SECCIÓN CALENDARIO ===== -->
+    <div id="sec-calendario" style="display:none">
+      <div class="section-header" style="margin-bottom:1.25rem">
+        <span class="section-title">Calendario semanal</span>
+        <div style="display:flex;gap:.5rem">
+          <button class="btn-sm" onclick="cambiarSemana(-1)">← Anterior</button>
+          <button class="btn-sm" onclick="cambiarSemana(1)">Siguiente →</button>
+        </div>
+      </div>
+      <div id="calWeekTitle" style="color:var(--muted);font-size:.85rem;margin-bottom:1rem"></div>
+      <div class="week-strip" id="weekStripCal" style="gap:.5rem"></div>
+    </div>
+
+    <!-- ===== SECCIÓN MI CANCHA ===== -->
+    <div id="sec-micancha" style="display:none">
+      <div class="section-header" style="margin-bottom:1.25rem">
+        <span class="section-title">Mi Cancha</span>
+      </div>
+      <div style="display:grid;gap:1rem;max-width:520px">
+        <div class="field-group">
+          <label class="field-label">Nombre de la cancha</label>
+          <input type="text" class="form-input" id="edit-nombre" placeholder="Nombre de tu cancha" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Tu link público</label>
+          <div style="display:flex;align-items:center;gap:.5rem">
+            <span style="color:var(--muted);font-size:.9rem">canchago.com.co/</span>
+            <input type="text" class="form-input" id="edit-slug" placeholder="mi-cancha" style="flex:1" />
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Dirección</label>
+          <input type="text" class="form-input" id="edit-direccion" placeholder="Dirección de la cancha" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Precio por hora (COP)</label>
+          <input type="number" class="form-input" id="edit-precio" placeholder="80000" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Descripción</label>
+          <textarea class="form-input" id="edit-descripcion" rows="3" style="resize:vertical" placeholder="Describe tu cancha..."></textarea>
+        </div>
+        <button class="btn-save-block" onclick="guardarCancha()" id="btnGuardarCancha" style="padding:.8rem;font-size:.95rem">Guardar cambios</button>
+        <p id="guardadoMsg" style="display:none;color:var(--green);font-size:.85rem;text-align:center">✅ Cambios guardados</p>
+      </div>
+    </div>
+
+    <!-- ===== SECCIÓN AYUDA ===== -->
+    <div id="sec-ayuda" style="display:none">
+      <div class="section-header" style="margin-bottom:1.5rem">
+        <span class="section-title">Ayuda</span>
+      </div>
+      <div style="max-width:560px;display:flex;flex-direction:column;gap:1rem">
+        <div style="background:var(--card2);border-radius:10px;padding:1.25rem">
+          <div style="font-weight:700;margin-bottom:.4rem">¿Cómo bloqueo un horario?</div>
+          <div style="color:var(--muted);font-size:.875rem;line-height:1.6">Ve a la sección <strong>Hoy</strong>, usa el panel "Bloquear horario" para seleccionar las horas que quieres cerrar y haz clic en Guardar.</div>
+        </div>
+        <div style="background:var(--card2);border-radius:10px;padding:1.25rem">
+          <div style="font-weight:700;margin-bottom:.4rem">¿Cuándo recibo el dinero?</div>
+          <div style="color:var(--muted);font-size:.875rem;line-height:1.6">CanchaGo recibe el pago y te transfiere el 95% cada semana. Recibirás un correo con el detalle de la transferencia.</div>
+        </div>
+        <div style="background:var(--card2);border-radius:10px;padding:1.25rem">
+          <div style="font-weight:700;margin-bottom:.4rem">¿Cómo comparto mi link de reservas?</div>
+          <div style="color:var(--muted);font-size:.875rem;line-height:1.6">Tu link es <span id="ayuda-link" style="color:var(--green);font-weight:600"></span>. Compártelo por WhatsApp, Instagram o como lo prefieras.</div>
+        </div>
+        <div style="background:var(--card2);border-radius:10px;padding:1.25rem">
+          <div style="font-weight:700;margin-bottom:.4rem">Soporte</div>
+          <div style="color:var(--muted);font-size:.875rem;line-height:1.6">Escríbenos por WhatsApp al <strong style="color:var(--text)">+57 317 786 7255</strong> o a <strong style="color:var(--text)">soporte@canchago.com.co</strong>.</div>
+        </div>
+      </div>
     </div>
 
   </div><!-- /main-inner -->
@@ -1482,18 +1596,121 @@ function closeSidebar() {
   document.body.style.overflow = '';
 }
 
+const SECCIONES = ['hoy','reservas','calendario','micancha','ayuda'];
+
 function showSection(name) {
+  SECCIONES.forEach(s => {
+    const el = document.getElementById('sec-' + s);
+    if (el) el.style.display = s === name ? '' : 'none';
+  });
   document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
   const match = [...document.querySelectorAll('.nav-link')].find(el => el.getAttribute('onclick') === `showSection('${name}')`);
   if (match) match.classList.add('active');
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  const tabMatch = [...document.querySelectorAll('.tab-item')].find(el => el.getAttribute('onclick') === `mobileTab(this,'${name}')`);
+  if (tabMatch) tabMatch.classList.add('active');
   if (window.innerWidth <= 700) closeSidebar();
-  showToast('Sección: ' + name.charAt(0).toUpperCase() + name.slice(1));
+  if (name === 'reservas') loadReservasAll();
+  if (name === 'calendario') renderCalSemana();
+  if (name === 'micancha') cargarFormCancha();
+  if (name === 'ayuda' && CANCHA) {
+    const el = document.getElementById('ayuda-link');
+    if (el) el.textContent = 'canchago.com.co/' + CANCHA.slug;
+  }
 }
 
 function mobileTab(el, section) {
-  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  if (section !== 'mas') showToast('Sección: ' + section.charAt(0).toUpperCase() + section.slice(1));
+  showSection(section);
+}
+
+let reservasAllData = [];
+async function loadReservasAll() {
+  if (!canchaId) return;
+  const filtro = document.getElementById('filtroEstado')?.value || '';
+  let q = sb.from('reservas').select('*').eq('cancha_id', canchaId).order('fecha', { ascending: false }).order('hora', { ascending: false }).limit(100);
+  if (filtro) q = q.eq('estado', filtro);
+  const { data } = await q;
+  reservasAllData = data || [];
+  renderReservasAll();
+}
+
+function filtrarReservasAll() { loadReservasAll(); }
+
+function renderReservasAll() {
+  const tbody = document.getElementById('tbodyReservasAll');
+  const empty = document.getElementById('reservasAllEmpty');
+  if (!reservasAllData.length) { tbody.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+  const fmt = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
+  const estadoColor = { confirmada: '#22c55e', pendiente: '#eab308', cancelada: '#ef4444' };
+  tbody.innerHTML = reservasAllData.map(r => `
+    <tr>
+      <td>${r.fecha}</td>
+      <td>${r.hora.slice(0,5)}</td>
+      <td>${r.cliente_nombre}</td>
+      <td>${r.cliente_telefono || '—'}</td>
+      <td>${fmt.format(r.monto)}</td>
+      <td><span style="color:${estadoColor[r.estado]||'#9ca3af'};font-weight:600;font-size:.82rem">${r.estado}</span></td>
+    </tr>`).join('');
+}
+
+let calOffset = 0;
+function cambiarSemana(dir) { calOffset += dir; renderCalSemana(); }
+function renderCalSemana() {
+  const title = document.getElementById('calWeekTitle');
+  const strip = document.getElementById('weekStripCal');
+  if (!strip) return;
+  const hoy = new Date();
+  hoy.setDate(hoy.getDate() + calOffset * 7);
+  const lunes = new Date(hoy);
+  lunes.setDate(hoy.getDate() - ((hoy.getDay() + 6) % 7));
+  const dias = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(lunes);
+    d.setDate(lunes.getDate() + i);
+    dias.push(d);
+  }
+  const opts = { weekday: 'short', day: 'numeric', month: 'short' };
+  title.textContent = `${dias[0].toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })} — ${dias[6].toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+  strip.innerHTML = dias.map(d => {
+    const iso = d.toISOString().slice(0, 10);
+    const label = d.toLocaleDateString('es-CO', { weekday: 'short', day: 'numeric' });
+    const esHoy = iso === new Date().toISOString().slice(0, 10);
+    const cnt = (todaySlots || []).filter(s => s.fecha === iso && s.estado === 'reservado').length;
+    return `<div style="flex:1;background:var(--card2);border-radius:8px;padding:.75rem .5rem;text-align:center;border:1.5px solid ${esHoy ? 'var(--green)' : 'var(--border2)'}">
+      <div style="font-size:.75rem;color:var(--muted);margin-bottom:.3rem">${label}</div>
+      <div style="font-size:1.1rem;font-weight:700;color:${cnt > 0 ? 'var(--green)' : 'var(--muted)'}">${cnt}</div>
+      <div style="font-size:.7rem;color:var(--muted)">reserv.</div>
+    </div>`;
+  }).join('');
+}
+
+async function cargarFormCancha() {
+  if (!CANCHA) return;
+  document.getElementById('edit-nombre').value      = CANCHA.nombre || '';
+  document.getElementById('edit-slug').value        = CANCHA.slug || '';
+  document.getElementById('edit-direccion').value   = CANCHA.direccion || '';
+  document.getElementById('edit-precio').value      = CANCHA.precio_hora || '';
+  document.getElementById('edit-descripcion').value = CANCHA.descripcion || '';
+}
+
+async function guardarCancha() {
+  const btn = document.getElementById('btnGuardarCancha');
+  const msg = document.getElementById('guardadoMsg');
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  const { error } = await sb.from('canchas').update({
+    nombre:      document.getElementById('edit-nombre').value.trim(),
+    slug:        document.getElementById('edit-slug').value.trim().toLowerCase().replace(/\s+/g,'-'),
+    direccion:   document.getElementById('edit-direccion').value.trim(),
+    precio_hora: parseInt(document.getElementById('edit-precio').value) || null,
+    descripcion: document.getElementById('edit-descripcion').value.trim(),
+  }).eq('id', canchaId);
+  btn.disabled = false; btn.textContent = 'Guardar cambios';
+  if (error) { showToast('Error: ' + error.message); return; }
+  msg.style.display = 'block';
+  setTimeout(() => msg.style.display = 'none', 3000);
+  const { data } = await sb.from('canchas').select('*').eq('id', canchaId).single();
+  if (data) CANCHA = data;
 }
 
 /* ============================================================
