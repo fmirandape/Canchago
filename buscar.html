@@ -436,21 +436,19 @@
     };
   }
 
+  const _sb = supabase.createClient(
+    'https://xqklrfzhpywbyxhskvtq.supabase.co',
+    'sb_publishable_nwWnl9ohsydrFtzmGjJz4A_dGodbr8D'
+  );
+
   async function loadRealCourts() {
-    try {
-      const { createClient } = supabase;
-      const sb = createClient(
-        'https://xqklrfzhpywbyxhskvtq.supabase.co',
-        'sb_publishable_nwWnl9ohsydrFtzmGjJz4A_dGodbr8D'
-      );
-      const { data } = await sb.from('canchas')
-        .select('id, slug, nombre, localidad, deportes, precio_hora, luz, cubierta, parqueadero, foto_url, cesped, vestieres')
-        .eq('activa', true);
-      if (data && data.length > 0) {
-        realCourts = data.map(sbCanchaToCard);
-        applyFilters();
-      }
-    } catch(e) { /* falla silenciosamente, muestra demo */ }
+    const { data, error } = await _sb.from('canchas')
+      .select('id, slug, nombre, localidad, deportes, precio_hora, luz, cubierta, parqueadero, foto_url')
+      .eq('activa', true);
+    if (data && data.length > 0) {
+      realCourts = data.map(sbCanchaToCard);
+      applyFilters();
+    }
   }
 
   /* ===== RENDER — muestra reales primero ===== */
