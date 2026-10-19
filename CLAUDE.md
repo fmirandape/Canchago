@@ -49,11 +49,16 @@ Plataforma de reservas de canchas deportivas para Bogotá, Colombia.
 - [x] Código de reserva CGO-XXXXX
 - [x] Web Share API en cancha.html
 - [x] Login de dueños con Supabase Auth (login.html)
+- [x] Google Auth en login.html y registro.html (signInWithOAuth → panel.html)
 - [x] Panel conectado a Supabase: reservas reales, KPIs, bloqueo de turnos
+- [x] Panel: navegación real entre secciones (Hoy, Reservas, Calendario, Mi Cancha, Ayuda)
+- [x] Panel sección Reservas: todas las reservas con filtro por estado
+- [x] Panel sección Mi Cancha: formulario para editar datos de la cancha
 - [x] Lista de espera guardada en Supabase + contador en tiempo real
 - [x] cancha.html carga por ?slug=, consulta disponibilidad real, guarda reservas
 - [x] Wompi pagos: PSE, Nequi, tarjeta — checkout hosted, webhook HMAC-SHA256
 - [x] Email de confirmación al cliente vía Resend desde reservas@canchago.com.co
+- [x] Email de notificación al dueño de cancha al confirmar reserva (nombre, teléfono cliente, monto)
 - [x] Security headers en GitHub Pages (_headers)
 - [x] Rate limiting en Edge Function generar-pago (10 req/min por IP)
 - [x] Ley 1581 — política de privacidad + checkbox obligatorio en reserva
@@ -79,9 +84,9 @@ Plataforma de reservas de canchas deportivas para Bogotá, Colombia.
 ### Integración actual (oct 2026)
 | Archivo | Supabase |
 |---|---|
-| `registro.html` | `auth.signUp()` + INSERT `canchas` ✅ |
-| `login.html` | `auth.signInWithPassword()` → redirige a panel.html ✅ |
-| `panel.html` | Auth check + SELECT `canchas`, `reservas`, `disponibilidad` · INSERT/DELETE `disponibilidad` ✅ |
+| `registro.html` | `auth.signUp()` + `auth.signInWithOAuth(google)` + INSERT `canchas` ✅ |
+| `login.html` | `auth.signInWithPassword()` + `auth.signInWithOAuth(google)` → panel.html ✅ |
+| `panel.html` | Auth check + SELECT `canchas`, `reservas`, `disponibilidad` · INSERT/DELETE `disponibilidad` · UPDATE `canchas` ✅ |
 | `cancha.html` | SELECT `canchas` por slug · SELECT `disponibilidad` · INSERT `reservas` ✅ |
 | `lista-espera.html` | INSERT `lista_espera` · SELECT count (política pública) ✅ |
 | `buscar.html` | Data hardcodeada (12 canchas demo) — intencional hasta onboarding real |
@@ -142,7 +147,9 @@ create trigger on_reserva_created
 - **From**: `reservas@canchago.com.co`
 - **Secret en Supabase**: `RESEND_API_KEY`
 - **Cuándo envía**: al confirmar pago (estado APPROVED en webhook de Wompi)
-- **Contenido email**: código CGO-XXXXX, cancha, fecha, hora, monto pagado
+- **Email al cliente**: código CGO-XXXXX, cancha, fecha, hora, monto pagado
+- **Email al dueño**: nombre y teléfono del cliente, fecha, hora, monto recibido, botón al panel
+- **Cómo obtiene email del dueño**: `auth.admin.getUserById(dueño_id)` con service role key
 
 ## Modelo de negocio — operación
 - CanchaGo recibe el 100% del pago vía Wompi
@@ -155,6 +162,13 @@ create trigger on_reserva_created
 - **Rate limiting**: tabla `rate_limits` + función `check_rate_limit()` en Postgres · máx 10 req/min por IP en `generar-pago`
 - **Ley 1581**: `privacidad.html` con política completa · checkbox obligatorio en formulario de reserva · link en footer de index.html
 - **Archivos del proyecto**: agregar `privacidad.html` a la tabla de archivos
+
+## Google Auth (oct 2026 — activo)
+- **Provider**: Google OAuth via Supabase Auth
+- **Configurado en**: Google Cloud Console → proyecto "CAnchaGo"
+- **App name**: CanchaGo · **Dominio autorizado**: canchago.com.co · **Privacy policy**: canchago.com.co/privacidad.html
+- **Redirect**: `https://canchago.com.co/panel.html` para login y registro
+- **Nota**: pantalla de consentimiento muestra `xqklrfzhpywbyxhskvtq.supabase.co` como dominio técnico (cambiaría con Supabase custom domain Pro)
 
 ## Roadmap pendiente (en orden)
 1. **Fase 1 ✅ COMPLETA** — Supabase + Auth + todas las páginas conectadas
