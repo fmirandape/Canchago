@@ -56,6 +56,8 @@ Plataforma de reservas de canchas deportivas para Bogotá, Colombia.
 - [x] Panel sección Mi Cancha: formulario para editar datos de la cancha + subida de foto
 - [x] Foto de cancha: upload a Supabase Storage (bucket `canchas-fotos`) desde panel, hero en cancha.html
 - [x] buscar.html: carga canchas reales de Supabase (primero) + 12 demo como relleno, badge REAL
+- [x] buscar.html: normalización de etiquetas de deporte (BD → display) con mapa DEPORTE_LABEL
+- [x] Nav principal: enlace "Buscar canchas" en desktop y menú móvil
 - [x] Lista de espera guardada en Supabase + contador en tiempo real
 - [x] cancha.html carga por ?slug=, consulta disponibilidad real, guarda reservas
 - [x] Wompi pagos: PSE, Nequi, tarjeta — checkout hosted, webhook HMAC-SHA256
