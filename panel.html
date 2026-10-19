@@ -1743,10 +1743,13 @@ async function subirFoto(file) {
   setTimeout(() => status.textContent = '', 3000);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+// El script corre al final del body — DOM ya existe
+(function() {
   const fotoInput = document.getElementById('foto-input');
-  if (fotoInput) fotoInput.addEventListener('change', e => subirFoto(e.target.files[0]));
-});
+  if (fotoInput) fotoInput.addEventListener('change', function() {
+    if (this.files && this.files[0]) subirFoto(this.files[0]);
+  });
+})();
 
 async function guardarCancha() {
   const btn = document.getElementById('btnGuardarCancha');
