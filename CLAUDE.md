@@ -53,7 +53,9 @@ Plataforma de reservas de canchas deportivas para Bogotá, Colombia.
 - [x] Panel conectado a Supabase: reservas reales, KPIs, bloqueo de turnos
 - [x] Panel: navegación real entre secciones (Hoy, Reservas, Calendario, Mi Cancha, Ayuda)
 - [x] Panel sección Reservas: todas las reservas con filtro por estado
-- [x] Panel sección Mi Cancha: formulario para editar datos de la cancha
+- [x] Panel sección Mi Cancha: formulario para editar datos de la cancha + subida de foto
+- [x] Foto de cancha: upload a Supabase Storage (bucket `canchas-fotos`) desde panel, hero en cancha.html
+- [x] buscar.html: carga canchas reales de Supabase (primero) + 12 demo como relleno, badge REAL
 - [x] Lista de espera guardada en Supabase + contador en tiempo real
 - [x] cancha.html carga por ?slug=, consulta disponibilidad real, guarda reservas
 - [x] Wompi pagos: PSE, Nequi, tarjeta — checkout hosted, webhook HMAC-SHA256
@@ -89,7 +91,7 @@ Plataforma de reservas de canchas deportivas para Bogotá, Colombia.
 | `panel.html` | Auth check + SELECT `canchas`, `reservas`, `disponibilidad` · INSERT/DELETE `disponibilidad` · UPDATE `canchas` ✅ |
 | `cancha.html` | SELECT `canchas` por slug · SELECT `disponibilidad` · INSERT `reservas` ✅ |
 | `lista-espera.html` | INSERT `lista_espera` · SELECT count (política pública) ✅ |
-| `buscar.html` | Data hardcodeada (12 canchas demo) — intencional hasta onboarding real |
+| `buscar.html` | SELECT `canchas` activas → mostrar primero, luego 12 demo como relleno ✅ |
 
 ### Políticas RLS adicionales ejecutadas en SQL Editor
 ```sql
@@ -163,11 +165,22 @@ create trigger on_reserva_created
 - **Ley 1581**: `privacidad.html` con política completa · checkbox obligatorio en formulario de reserva · link en footer de index.html
 - **Archivos del proyecto**: agregar `privacidad.html` a la tabla de archivos
 
+## Supabase Storage (oct 2026 — activo)
+- **Bucket**: `canchas-fotos` (público)
+- **Políticas RLS**: upload/update solo el dueño (`auth.uid() = foldername[1]`), read público
+- **Path de archivos**: `{userId}/{canchaId}.{ext}` — upsert para reemplazar
+- **Columna en BD**: `canchas.foto_url text` (agregada con ALTER TABLE)
+- **Flujo**: panel Mi Cancha → `sb.storage.upload()` → `getPublicUrl()` → UPDATE `canchas.foto_url`
+- **En cancha.html**: hero 240px si hay foto, fallback emoji por deporte
+- **En buscar.html**: foto en card si existe, emoji como fondo si no
+
 ## Google Auth (oct 2026 — activo)
 - **Provider**: Google OAuth via Supabase Auth
 - **Configurado en**: Google Cloud Console → proyecto "CAnchaGo"
 - **App name**: CanchaGo · **Dominio autorizado**: canchago.com.co · **Privacy policy**: canchago.com.co/privacidad.html
 - **Redirect**: `https://canchago.com.co/panel.html` para login y registro
+- **Supabase Site URL**: `https://canchago.com.co` (Authentication → URL Configuration)
+- **Redirect URLs en Supabase**: `https://canchago.com.co/panel.html`
 - **Nota**: pantalla de consentimiento muestra `xqklrfzhpywbyxhskvtq.supabase.co` como dominio técnico (cambiaría con Supabase custom domain Pro)
 
 ## Roadmap pendiente (en orden)
