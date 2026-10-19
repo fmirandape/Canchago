@@ -195,6 +195,7 @@
     }
   </style>
 </head>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <body>
 
 <!-- NAV -->
@@ -327,11 +328,12 @@
     if (c.parking) extras.push('🅿️ Parking');
     if (c.cubierta) extras.push('🏠 Cubierta');
     return `
-      <div class="court-card" onclick="window.location.href='cancha.html'" role="article" aria-label="${c.name}">
+      <div class="court-card" onclick="window.location.href='cancha.html${c.slug ? '?slug=' + c.slug : ''}'" role="article" aria-label="${c.name}">
         <div class="card-img">
           ${c.foto_url ? `<img src="${c.foto_url}" alt="${c.name}" loading="lazy" />` : ''}
           ${c.icon}
           <div class="card-avail ${aCls}">${aLabel}</div>
+          ${c.real ? '<div style="position:absolute;top:.5rem;right:.5rem;background:var(--green);color:#000;font-size:.6rem;font-weight:800;padding:.15rem .45rem;border-radius:5px">REAL</div>' : ''}
         </div>
         <div class="card-body">
           <div class="card-tags">
@@ -341,12 +343,12 @@
           </div>
           <div class="card-name">${c.name}</div>
           <div class="card-meta">
-            <span>⭐ ${c.rating} <span style="color:var(--border2)">(${c.reviews})</span></span>
+            <span>⭐ ${c.rating}${c.reviews ? ` <span style="color:var(--border2)">(${c.reviews})</span>` : ''}</span>
             <span>📍 ${c.localidad}</span>
           </div>
           <div class="card-footer">
             <div class="card-price">${formatPrice(c.price)} <span>/ hora</span></div>
-            <button class="btn-ver" onclick="event.stopPropagation();window.location.href='cancha.html'">${c.avail === 'llena' ? 'Ver horarios' : 'Reservar'}</button>
+            <button class="btn-ver" onclick="event.stopPropagation();window.location.href='cancha.html${c.slug ? '?slug=' + c.slug : ''}'">${c.avail === 'llena' ? 'Ver horarios' : 'Reservar'}</button>
           </div>
         </div>
       </div>`;
@@ -405,8 +407,97 @@
     document.getElementById('mapView').classList.toggle('show', v === 'map');
   }
 
+  /* ===== SUPABASE — canchas reales ===== */
+  let realCourts = [];
+
+  function sbCanchaToCard(c) {
+    const deporte  = (c.deportes || [])[0] || 'Fútbol 5';
+    const icon     = deporte.includes('Fútbol') ? '⚽' : deporte.includes('Pádel') || deporte.includes('Tenis') ? '🎾' : deporte.includes('Básquet') ? '🏀' : '🏐';
+    const tags     = [];
+    if (c.cesped)      tags.push('Césped sint.');
+    if (c.vestieres)   tags.push('Vestieres');
+    return {
+      id:        'real-' + c.id,
+      slug:      c.slug,
+      name:      c.nombre,
+      sport:     deporte,
+      localidad: c.localidad || 'Bogotá',
+      icon,
+      foto_url:  c.foto_url || null,
+      price:     c.precio_hora || 0,
+      rating:    4.8,
+      reviews:   0,
+      avail:     'disponible',
+      luz:       !!c.luz,
+      parking:   c.parqueadero && c.parqueadero !== 'no',
+      cubierta:  !!c.cubierta,
+      tags,
+      real:      true,
+    };
+  }
+
+  async function loadRealCourts() {
+    try {
+      const { createClient } = supabase;
+      const sb = createClient(
+        'https://xqklrfzhpywbyxhskvtq.supabase.co',
+        'sb_publishable_nwWnl9ohsydrFtzmGjJz4A_dGodbr8D'
+      );
+      const { data } = await sb.from('canchas')
+        .select('id, slug, nombre, localidad, deportes, precio_hora, luz, cubierta, parqueadero, foto_url, cesped, vestieres')
+        .eq('activa', true);
+      if (data && data.length > 0) {
+        realCourts = data.map(sbCanchaToCard);
+        applyFilters();
+      }
+    } catch(e) { /* falla silenciosamente, muestra demo */ }
+  }
+
+  /* ===== RENDER — muestra reales primero ===== */
+  function allCourts() {
+    // IDs de demos que ya existen como reales (para no duplicar por slug)
+    const realSlugs = new Set(realCourts.map(c => c.slug));
+    return [...realCourts, ...COURTS];
+  }
+
+  /* Parche a applyFilters para usar allCourts() */
+  const _origApply = applyFilters;
+  applyFilters = function() {
+    const sport     = activeSport || document.getElementById('fDeporte').value;
+    const localidad = document.getElementById('fLocalidad').value;
+    const sort      = document.getElementById('sortSelect').value;
+
+    let list = allCourts().filter(c => {
+      if (sport && sport !== '💡 Con luz' && sport !== '🅿️ Parqueadero' && sport !== '🏠 Cubierta' && c.sport !== sport) return false;
+      if (sport === '💡 Con luz' && !c.luz) return false;
+      if (sport === '🅿️ Parqueadero' && !c.parking) return false;
+      if (sport === '🏠 Cubierta' && !c.cubierta) return false;
+      if (localidad && c.localidad !== localidad) return false;
+      return true;
+    });
+
+    if (sort === 'precio-asc')  list.sort((a,b) => a.price - b.price);
+    if (sort === 'precio-desc') list.sort((a,b) => b.price - a.price);
+    if (sort === 'rating')      list.sort((a,b) => b.rating - a.rating);
+    // Reales siempre primero en orden por defecto
+    if (!sort || sort === 'relevancia') list.sort((a,b) => (b.real ? 1 : 0) - (a.real ? 1 : 0));
+
+    const wrap  = document.getElementById('cardsWrap');
+    const empty = document.getElementById('emptyState');
+    document.getElementById('resultsCount').innerHTML = `<strong>${list.length}</strong> cancha${list.length !== 1 ? 's' : ''} disponible${list.length !== 1 ? 's' : ''}`;
+
+    if (list.length === 0) {
+      wrap.innerHTML = '';
+      empty.style.display = 'block';
+    } else {
+      empty.style.display = 'none';
+      wrap.innerHTML = list.map(renderCard).join('');
+    }
+  };
+
   /* ===== INIT ===== */
   applyFilters();
+  loadRealCourts();
 </script>
 </body>
 </html>
